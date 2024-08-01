@@ -59,7 +59,7 @@ def create_new_job(cluster: str, idx: int) -> bool:
     slurm_filename = f"{cluster}.slurm"
     try:
         slurm_contents = read_file(slurm_filename)
-        new_lines = switch_job(job_command, slurm_contents, job_to_run[3])
+        new_lines = switch_job(job_command, slurm_contents, 1)
         write_to_file(slurm_filename, new_lines)
         subprocess.run(["sbatch", slurm_filename])
         return True
