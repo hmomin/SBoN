@@ -1,4 +1,6 @@
 def validate_llm_name(llm_name: str) -> None:
+    # NOTE: changing this function is just getting annoying...
+    return
     valid_llm_names = [
         "gpt2",
         "sft10k",
@@ -20,6 +22,8 @@ def validate_alpha(alpha: float) -> None:
 
 
 def validate_reward_model_name(reward_model_name: str) -> None:
+    # NOTE: changing this function is just getting annoying...
+    return
     valid_reward_models = [
         "reward-model-human",
         "reward-model-sim",

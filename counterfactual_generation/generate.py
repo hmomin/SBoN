@@ -11,11 +11,9 @@
 
 import argparse
 import gc
-import numpy as np
 import secrets
 import torch
 from accelerate import PartialState
-from accelerate.utils import gather_object
 from best_of_n import BestOfN
 from pprint import pprint
 from typing import Any

@@ -44,7 +44,12 @@ class Generator(object):
         self.generation_tokenizer = get_generation_tokenizer(
             llm_name, args.local_files_only
         )
-        self.stop_tokens = ["</s>", "<|end_of_text|>", "<|eot_id|>"]
+        self.stop_tokens = [
+            "</s>",
+            "<|end_of_text|>",
+            "<|eot_id|>",
+            self.generation_tokenizer.eos_token,
+        ]
         self.terminators = get_terminators(llm_name, self.generation_tokenizer)
 
         self.generation_model = get_generation_model(
