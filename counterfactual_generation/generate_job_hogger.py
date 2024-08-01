@@ -96,9 +96,7 @@ def get_job_command_from_tuple(job_tuple: tuple, output_folder: str) -> str:
         + f"--data_filename {data_filename} "
         + f"--output_folder {output_folder} "
         + f"--llm_name {LLM_name} "
-        + f"--reward_model_name {RM_name} "
-        if len(RM_name) > 0
-        else ""
+        + (f"--reward_model_name {RM_name} " if len(RM_name) > 0 else "")
         + f"--num_trajectories {num_trajectories} "
         + f"--max_length {max_length} "
         + f"--batch_size {batch_size} "
