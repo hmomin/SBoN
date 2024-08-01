@@ -14,9 +14,9 @@ MAX_GPUS = 16
 JOBS = {
     "A100": [],
     "H100": [
-        ("./datasets/alpaca_farm_100.json", "Mistral-7B-v0.3", "", 50, 1000, 0),
-        ("./datasets/alpaca_farm_100.json", "Meta-Llama-3-8B", "", 50, 1000, 0),
-        ("./datasets/alpaca_farm_100.json", "gpt-j-6b", "", 35, 1000, 0),
+        ("./datasets/alpaca_farm_100.json", "gpt-j-6b", "", 20, 40, 0),
+        ("./datasets/alpaca_farm_100.json", "Mistral-7B-v0.3", "", 20, 40, 0),
+        ("./datasets/alpaca_farm_100.json", "Meta-Llama-3-8B", "", 20, 40, 0),
     ],
 }
 
