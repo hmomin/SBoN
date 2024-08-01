@@ -10,7 +10,6 @@ from utils.trajectory import Trajectory
 from utils.reward_utils import (
     compute_scores,
 )
-from engine.models.llm import LLM
 
 
 class BestOfN(Generator):
@@ -30,70 +29,17 @@ class BestOfN(Generator):
         )
         self.clock.stop("tokenization")
         self.clock.start()
-
-        # set max tokens for engine
-        input_length = batch_encoding.input_ids.shape[-1]
-        max_all_tokens = min(
-            self.args.max_tokens, self.args.max_gen_tokens + input_length
+        full_generation: torch.LongTensor = self.generation_model.generate(
+            input_ids=batch_encoding.input_ids,
+            attention_mask=batch_encoding.attention_mask,
+            max_length=self.args.max_length,
+            eos_token_id=self.terminators,
+            pad_token_id=self.generation_tokenizer.pad_token_id,
+            do_sample=True,
+            top_p=self.args.top_p,
+            top_k=self.args.top_k,
+            temperature=self.args.temperature,
         )
-        # decide init bsz for engine
-        if isinstance(self.generation_model, LLM):
-            self.generation_model.max_tokens = max_all_tokens
-            # batch_size = 200 # self.generation_model.get_batch_size(max_seq=max_all_tokens)
-            # templated_prompts = [self.templated_prompt] * batch_size
-            # batch_encoding = get_input_encoding(
-            #     templated_prompts,
-            #     self.generation_model,
-            #     self.generation_tokenizer,
-            # )
-            batch_size = self.args.batch_size
-            gen_len = max_all_tokens - input_length
-            try:
-                full_generation = self.generation_model.generate(
-                    input_ids=batch_encoding.input_ids,
-                    batch_size=batch_size,
-                    gen_len=gen_len,
-                    top_k=self.args.top_k,
-                    top_p=self.args.top_p,
-                    temperature=self.args.temperature,
-                )
-            except RuntimeError as e:
-                print(e)
-                # reduce batch size and then try again
-                bsz1 = batch_size // 2
-                bsz2 = batch_size - bsz1
-                full_generation_1 = self.generation_model.generate(
-                    input_ids=batch_encoding.input_ids[:bsz1],
-                    batch_size=bsz1,
-                    gen_len=gen_len,
-                    top_k=self.args.top_k,
-                    top_p=self.args.top_p,
-                    temperature=self.args.temperature,
-                )
-                full_generation_2 = self.generation_model.generate(
-                    input_ids=batch_encoding.input_ids[bsz1:],
-                    batch_size=bsz2,
-                    gen_len=gen_len,
-                    top_k=self.args.top_k,
-                    top_p=self.args.top_p,
-                    temperature=self.args.temperature,
-                )
-                full_generation = torch.cat(
-                    [full_generation_1, full_generation_2], dim=0
-                )
-
-        else:
-            full_generation: torch.LongTensor = self.generation_model.generate(
-                input_ids=batch_encoding.input_ids,
-                attention_mask=batch_encoding.attention_mask,
-                max_length=max_all_tokens,
-                eos_token_id=self.terminators,
-                pad_token_id=self.generation_tokenizer.pad_token_id,
-                do_sample=True,
-                top_p=self.args.top_p,
-                top_k=self.args.top_k,
-                temperature=self.args.temperature,
-            )
         self.clock.stop("generation pass")
         print(f"full_generation shape: {full_generation.shape}")
         self.clock.start()
@@ -108,13 +54,16 @@ class BestOfN(Generator):
         )
         self.clock.stop("decoding")
         self.clock.start()
-        reward_list = compute_scores(
-            prompt,
-            unpadded_output_texts,
-            self.reward_model_name,
-            self.reward_tokenizer,
-            self.reward_model,
-        )
+        if self.should_score:
+            reward_list = compute_scores(
+                prompt,
+                unpadded_output_texts,
+                self.reward_model_name,
+                self.reward_tokenizer,
+                self.reward_model,
+            )
+        else:
+            reward_list = [0.0] * len(unpadded_output_texts)
         self.clock.stop("reward pass")
         self.clock.start()
         for padded_output_text, unpadded_output_text, score in zip(

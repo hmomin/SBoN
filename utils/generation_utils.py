@@ -3,8 +3,6 @@ import transformers
 
 transformers.logging.set_verbosity_error()
 
-from engine.utils.sampling import sample, norm_logits
-
 
 def get_generation_tokenizer(
     llm_name: str, local_files_only=True

@@ -19,8 +19,6 @@ from utils.validation_utils import (
     validate_reward_model_name,
 )
 
-from engine.models.llm import LLM
-
 
 class Generator(object):
     def __init__(
@@ -29,12 +27,10 @@ class Generator(object):
         distributed_state: PartialState,
     ) -> None:
         validate_llm_name(args.llm_name)
-        validate_reward_model_name(args.reward_model_name)
         llm_name = get_full_model_name(args.model_dir, args.llm_name)
-        reward_model_name = get_full_model_name(args.model_dir, args.reward_model_name)
 
         self.llm_name = llm_name
-        self.reward_model_name = reward_model_name
+        self.should_score = len(args.reward_model_name) > 0
         self.args = args
         self.distributed_state = distributed_state
         self.clock = Clock()
@@ -51,36 +47,27 @@ class Generator(object):
         self.stop_tokens = ["</s>", "<|end_of_text|>", "<|eot_id|>"]
         self.terminators = get_terminators(llm_name, self.generation_tokenizer)
 
-        if args.efficient:
-            self.generation_model = LLM(
-                llm_name,
-                device=distributed_state.device,
-                local_files_only=args.local_files_only,
-            )
-            if args.spec_dec:
-                self.draft_model = LLM(
-                    model_name="Felladrin/Llama-68M-Chat-v1",
-                    device=distributed_state.device,
-                    local_files_only=args.local_files_only,
-                )
-            else:
-                self.draft_model = None
-        else:
-            self.generation_model = get_generation_model(
-                llm_name,
-                distributed_state.device,
-                local_files_only=args.local_files_only,
-            )
-
-        self.reward_tokenizer = get_reward_tokenizer(
-            reward_model_name, local_files_only=args.local_files_only
-        )
-        self.reward_model = get_reward_model(
-            reward_model_name,
-            self.reward_tokenizer,
+        self.generation_model = get_generation_model(
+            llm_name,
             distributed_state.device,
             local_files_only=args.local_files_only,
         )
+
+        if self.should_score:
+            validate_reward_model_name(args.reward_model_name)
+            reward_model_name = get_full_model_name(
+                args.model_dir, args.reward_model_name
+            )
+            self.reward_model_name = reward_model_name
+            self.reward_tokenizer = get_reward_tokenizer(
+                reward_model_name, local_files_only=args.local_files_only
+            )
+            self.reward_model = get_reward_model(
+                reward_model_name,
+                self.reward_tokenizer,
+                distributed_state.device,
+                local_files_only=args.local_files_only,
+            )
 
         self.templated_prompt = ""
 

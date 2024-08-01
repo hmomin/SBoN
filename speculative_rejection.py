@@ -11,8 +11,6 @@ from utils.reward_utils import compute_scores
 from utils.sbon_utils import get_memory_constrained_batch_size
 from utils.trajectory import Trajectory
 from utils.validation_utils import validate_alpha
-import torch, gc
-from engine.models.llm import LLM
 
 
 class SpeculativeRejection(Generator):
