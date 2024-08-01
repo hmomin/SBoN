@@ -78,7 +78,7 @@ def get_output_folder_from_tuple(job_tuple: tuple, cluster: str) -> str:
         seed,
     ) = job_tuple
     data_code = "AF" if "alpaca" in data_filename else "HH"
-    return f"output_{cluster}__{data_code}_{LLM_name}_{RM_name}_{batch_size}_{num_trajectories}_seed_{seed}"
+    return f"output_{cluster}_{data_code}_{LLM_name}_{RM_name}_{batch_size}_{num_trajectories}_seed_{seed}"
 
 
 def get_job_command_from_tuple(job_tuple: tuple, output_folder: str) -> str:
@@ -97,6 +97,8 @@ def get_job_command_from_tuple(job_tuple: tuple, output_folder: str) -> str:
         + f"--output_folder {output_folder} "
         + f"--llm_name {LLM_name} "
         + f"--reward_model_name {RM_name} "
+        if len(RM_name) > 0
+        else ""
         + f"--num_trajectories {num_trajectories} "
         + f"--max_length {max_length} "
         + f"--batch_size {batch_size} "
