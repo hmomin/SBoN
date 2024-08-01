@@ -11,6 +11,7 @@
 
 import argparse
 import gc
+import os
 import secrets
 import torch
 from accelerate import PartialState
@@ -22,6 +23,8 @@ from utils.read_write_utils import (
     get_generation_prompts,
     write_to_disk,
 )
+
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 
 def get_args():
@@ -86,6 +89,12 @@ def get_args():
     parser.add_argument(
         "--top_p",
         help="top-p parameter for generation model",
+        type=float,
+        default=1.0,
+    )
+    parser.add_argument(
+        "--temperature",
+        help="temperature parameter for generation model",
         type=float,
         default=1.0,
     )

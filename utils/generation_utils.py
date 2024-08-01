@@ -99,15 +99,6 @@ def get_output_texts(
             "<s> [INST]", "<s>[INST]"
         )  # for llama-2-chat-hf
         split_pieces = generation_text.split(prompt)
-        # print(generation_ids)
-        # print(generation_tokenizer.decode(generation_ids[0]))
-        # print(prompt)
-        # print(generation_text)
-        # # write to txt:
-        # with open('output.txt', 'w') as f:
-        #     f.write(generation_text)
-        # with open('output2.txt', 'w') as f:
-        #     f.write(prompt)
         assert (
             prompt in generation_text
         ), f"prompt: {prompt} | generation_text: {generation_text}"
