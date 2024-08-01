@@ -92,7 +92,7 @@ def get_job_command_from_tuple(job_tuple: tuple, output_folder: str) -> str:
     ) = job_tuple
     max_length = 2_048 if any(s in LLM_name for s in ["sft10k", "gpt-j-6b"]) else 8_000
     job_command = (
-        +f"python -m counterfactual_generation.generate "
+        f"python -m counterfactual_generation.generate "
         + f"--data_filename {data_filename} "
         + f"--output_folder {output_folder} "
         + f"--llm_name {LLM_name} "
