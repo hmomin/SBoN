@@ -11,6 +11,7 @@
 
 import argparse
 import gc
+import numpy as np
 import os
 import secrets
 import torch
@@ -127,12 +128,7 @@ def main() -> None:
     args = get_args()
     pprint(vars(args))
 
-    num_batches: int = args.num_trajectories // args.batch_size
-
-    if args.batch_size * num_batches < args.num_trajectories:
-        raise Exception(
-            f"num_trajectories ({args.num_trajectories}) must be a multiple of batch_size ({args.batch_size})"
-        )
+    num_batches = int(np.ceil(args.num_trajectories / args.batch_size))
 
     generator = BestOfN(args, distributed_state)
 
@@ -148,7 +144,6 @@ def main() -> None:
         for _ in range(num_batches):
             generator.generate(prompt, prompt_dict=prompt_dict)
             full_data.extend(generator.all_data)
-            print(f"elapsed sec: {generator.all_data[0]['elapsed_sec']}", flush=True)
 
             gc.collect()
             torch.cuda.empty_cache()

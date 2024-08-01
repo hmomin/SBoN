@@ -96,7 +96,7 @@ class Generator(object):
 
     def post_generation(self) -> None:
         elapsed_time = self.clock.get_time()
-        print(f"Elapsed time: {elapsed_time:.2f} seconds")
+        print(f"Elapsed time: {elapsed_time:.2f} seconds", flush=True)
         self.all_data[0]["elapsed_sec"] = elapsed_time
         self.all_data[0]["clock"] = self.clock.get_chunks()
         save_data(self.all_data, self.trajectories)
