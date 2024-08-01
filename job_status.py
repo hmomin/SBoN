@@ -3,7 +3,10 @@ import os
 import subprocess
 import time
 from datetime import datetime
-from parallel_job_hogger import JOBS, get_output_folder_from_tuple
+from .counterfactual_generation.generate_job_hogger import (
+    JOBS,
+    get_output_folder_from_tuple,
+)
 
 
 USERNAME = "my0049"
