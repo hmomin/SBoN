@@ -3,7 +3,7 @@ import os
 import subprocess
 import time
 from datetime import datetime
-from .counterfactual_generation.generate_job_hogger import (
+from counterfactual_generation.generate_job_hogger import (
     JOBS,
     get_output_folder_from_tuple,
 )
@@ -17,7 +17,7 @@ def get_args() -> argparse.Namespace:
     parser.add_argument(
         "--no_empty",
         action="store_true",
-        default=True,
+        default=False,
         help="Don't show empty folders",
     )
     parser.add_argument(
