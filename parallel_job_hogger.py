@@ -14,15 +14,7 @@ MAX_GPUS = 16
 # JOB FORMAT: (LLM, RM, BATCH_SIZE, NUM_GPUS, SPECULATIVE_REJECTION, SEED, ALPHA)
 JOBS = {
     "A100": [],
-    "H100": [
-        ("sft10k", "reward-model-human", 45, 8, False, 0, -1.0),
-        ("sft10k", "reward-model-human", 45, 8, False, 8, -1.0),
-        ("sft10k", "reward-model-human", 45, 8, False, 16, -1.0),
-        ("sft10k", "reward-model-human", 45, 8, False, 24, -1.0),
-        ("sft10k", "reward-model-human", 45, 4, False, 0, -1.0),
-        ("sft10k", "reward-model-human", 45, 2, False, 0, -1.0),
-        ("sft10k", "reward-model-human", 45, 1, False, 0, -1.0),
-    ],
+    "H100": [],
 }
 
 
