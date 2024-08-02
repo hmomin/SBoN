@@ -18,6 +18,7 @@ import torch
 from accelerate import PartialState
 from best_of_n import BestOfN
 from pprint import pprint
+from time import time
 from typing import Any
 from utils.read_write_utils import (
     create_output_folder,
@@ -136,6 +137,7 @@ def main() -> None:
     output_folder = create_output_folder(args)
 
     full_data: list[dict[str, Any]] = []
+    start_time = time()
     while len(generation_prompts) > 0:
         print(f"Number of prompts remaining: {len(generation_prompts)}", flush=True)
         prompt_dict = secrets.choice(generation_prompts)
@@ -156,6 +158,10 @@ def main() -> None:
             args.pretty_print_output,
             args.record_memory,
         )
+        elapsed_hours = (time() - start_time) / 3600
+        # NOTE: we will stop after more than 2.5 hours of execution
+        if elapsed_hours > 2.5:
+            break
         generation_prompts = get_generation_prompts(args)
     print("DONE")
 

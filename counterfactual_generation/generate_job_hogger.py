@@ -12,11 +12,15 @@ USERNAME = "my0049"
 MAX_GPUS = 16
 # JOB FORMAT: (DATA_FILENAME, LLM, RM, BATCH_SIZE, NUM_TRAJECTORIES, SEED)
 JOBS = {
-    "A100": [],
+    "A100": [
+        ("./datasets/alpaca_farm_100.json", "gpt-j-6b", "", 20, 1_000, 0),
+        ("./datasets/alpaca_farm_100.json", "Mistral-7B-v0.3", "", 20, 1_000, 0),
+        ("./datasets/alpaca_farm_100.json", "Meta-Llama-3-8B", "", 20, 1_000, 0),
+    ],
     "H100": [
-        ("./datasets/alpaca_farm_100.json", "gpt-j-6b", "", 20, 40, 0),
-        ("./datasets/alpaca_farm_100.json", "Mistral-7B-v0.3", "", 20, 40, 0),
-        ("./datasets/alpaca_farm_100.json", "Meta-Llama-3-8B", "", 20, 40, 0),
+        ("./datasets/alpaca_farm_100.json", "gpt-j-6b", "", 20, 1_000, 0),
+        ("./datasets/alpaca_farm_100.json", "Mistral-7B-v0.3", "", 20, 1_000, 0),
+        ("./datasets/alpaca_farm_100.json", "Meta-Llama-3-8B", "", 20, 1_000, 0),
     ],
 }
 
@@ -78,7 +82,7 @@ def get_output_folder_from_tuple(job_tuple: tuple, cluster: str) -> str:
         seed,
     ) = job_tuple
     data_code = "AF" if "alpaca" in data_filename else "HH"
-    return f"output_{cluster}_{data_code}_{LLM_name}_{RM_name}_{batch_size}_{num_trajectories}_seed_{seed}"
+    return f"output_{data_code}_{LLM_name}_{RM_name}_{batch_size}_{num_trajectories}_seed_{seed}"
 
 
 def get_job_command_from_tuple(job_tuple: tuple, output_folder: str) -> str:
@@ -137,13 +141,17 @@ def main() -> None:
     queue_output = get_queue_output()
     A100_running_jobs = queue_output.count("A100")
     gpu_count = get_gpu_count(queue_output)
-    H100_index = 0
+    A100_index = H100_index = 0
 
     while len(JOBS["A100"]) + len(JOBS["H100"]) > 0:
-        if len(JOBS["A100"]) > 0 and A100_running_jobs < 2:
-            job_created = create_new_job("A100", 0)
+        if len(JOBS["A100"]) > 0 and A100_running_jobs < 3:
+            job_created = create_new_job("A100", A100_index)
             if not job_created:
-                JOBS["A100"].pop(0)
+                JOBS["A100"].pop(A100_index)
+            else:
+                A100_index = (
+                    (A100_index + 1) % len(JOBS["A100"]) if len(JOBS["A100"]) > 0 else 0
+                )
         if len(JOBS["H100"]) > 0 and gpu_count < MAX_GPUS:
             job_created = create_new_job("H100", H100_index)
             if not job_created:
