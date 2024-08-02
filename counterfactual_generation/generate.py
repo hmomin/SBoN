@@ -158,10 +158,10 @@ def main() -> None:
             args.pretty_print_output,
             args.record_memory,
         )
-        elapsed_hours = (time() - start_time) / 3600
-        # NOTE: we will stop after more than 2.5 hours of execution
-        if elapsed_hours > 2.5:
-            break
+        break  # NOTE: just stop after a single prompt - this prevents wasted computation
+        # elapsed_hours = (time() - start_time) / 3600
+        # if elapsed_hours > 2.5:
+        #     break
         generation_prompts = get_generation_prompts(args)
     print("DONE")
 
