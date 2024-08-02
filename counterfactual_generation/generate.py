@@ -136,9 +136,9 @@ def main() -> None:
     generation_prompts = get_generation_prompts(args)
     output_folder = create_output_folder(args)
 
-    full_data: list[dict[str, Any]] = []
     start_time = time()
     while len(generation_prompts) > 0:
+        full_data: list[dict[str, Any]] = []
         print(f"Number of prompts remaining: {len(generation_prompts)}", flush=True)
         prompt_dict = secrets.choice(generation_prompts)
         pprint(prompt_dict)
