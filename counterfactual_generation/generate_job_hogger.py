@@ -9,7 +9,8 @@ USERNAME = "my0049"
 # LLM in ("gpt-j-6b", "Mistral-7B-v0.3", "Meta-Llama-3-8B")
 # RM in ("RM-Mistral-7B", "FsfairX-LLaMA3-RM-v0.1", "ArmoRM-Llama3-8B-v0.1")
 
-MAX_GPUS = 16
+MAX_H100_GPUS = 16
+MAX_A100_JOBS = 4
 # JOB FORMAT: (DATA_FILENAME, LLM, RM, BATCH_SIZE, NUM_TRAJECTORIES, SEED)
 JOBS = {
     "A100": [
@@ -63,7 +64,7 @@ def create_new_job(cluster: str, idx: int) -> bool:
     slurm_filename = f"{cluster}.slurm"
     try:
         slurm_contents = read_file(slurm_filename)
-        new_lines = switch_job(job_command, slurm_contents, 1)
+        new_lines = switch_job(cluster, job_command, slurm_contents, 1)
         write_to_file(slurm_filename, new_lines)
         subprocess.run(["sbatch", slurm_filename])
         return True
@@ -117,13 +118,15 @@ def read_file(filename: str) -> list[str]:
     return contents
 
 
-def switch_job(job_to_run: str, slurm_contents: list[str], num_gpus: int) -> list[str]:
+def switch_job(
+    cluster: str, job_to_run: str, slurm_contents: list[str], num_gpus: int
+) -> list[str]:
     new_lines: list[str] = []
     for line in slurm_contents:
         if "python" in line or "accelerate" in line:
             new_lines.append(f"{job_to_run}\n")
         elif "#SBATCH --job-name=" in line:
-            new_lines.append(f"#SBATCH --job-name=H100GPU{num_gpus}\n")
+            new_lines.append(f"#SBATCH --job-name={cluster}GPU{num_gpus}\n")
         elif "#SBATCH --gres=gpu:" in line:
             new_lines.append(f"#SBATCH --gres=gpu:{num_gpus}\n")
         else:
@@ -144,7 +147,7 @@ def main() -> None:
     A100_index = H100_index = 0
 
     while len(JOBS["A100"]) + len(JOBS["H100"]) > 0:
-        if len(JOBS["A100"]) > 0 and A100_running_jobs < 3:
+        if len(JOBS["A100"]) > 0 and A100_running_jobs < MAX_A100_JOBS:
             job_created = create_new_job("A100", A100_index)
             if not job_created:
                 JOBS["A100"].pop(A100_index)
@@ -152,7 +155,7 @@ def main() -> None:
                 A100_index = (
                     (A100_index + 1) % len(JOBS["A100"]) if len(JOBS["A100"]) > 0 else 0
                 )
-        if len(JOBS["H100"]) > 0 and gpu_count < MAX_GPUS:
+        if len(JOBS["H100"]) > 0 and gpu_count < MAX_H100_GPUS:
             job_created = create_new_job("H100", H100_index)
             if not job_created:
                 JOBS["H100"].pop(H100_index)
