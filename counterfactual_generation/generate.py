@@ -17,6 +17,7 @@ import secrets
 import torch
 from accelerate import PartialState
 from best_of_n import BestOfN
+from collections import namedtuple
 from pprint import pprint
 from time import time
 from typing import Any
@@ -121,8 +122,8 @@ def get_args():
     parser.add_argument(
         "--device_id",
         help="which GPU to use",
-        type=str,
-        default="0",
+        type=int,
+        default=0,
     )
     args = parser.parse_args()
     return args
@@ -131,7 +132,10 @@ def get_args():
 def main() -> None:
     args = get_args()
     os.environ["CUDA_VISIBLE_DEVICES"] = args.device_id
-    distributed_state = PartialState()
+    PseudoState = namedtuple(
+        "PseudoState", ["device", "local_process_index", "is_main_process"]
+    )
+    distributed_state = PseudoState(f"cuda:{args.device_id}", 0, True)
     state_device = str(distributed_state.device)
     print(f"DEVICE: {state_device}")
     pprint(vars(args))
