@@ -137,6 +137,7 @@ def main() -> None:
         is_main_process=True,
     )
     state_device = str(distributed_state.device)
+    print(f"DEVICE: {state_device}")
     pprint(vars(args))
 
     num_batches = int(np.ceil(args.num_trajectories / args.batch_size))
