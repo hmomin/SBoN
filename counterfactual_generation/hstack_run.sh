@@ -1,6 +1,5 @@
 #!/bin/bash
 
-nvidia-smi
 source /home/ubuntu/miniconda3/etc/profile.d/conda.sh
 conda activate hf
 cd /home/ubuntu/SBoN
