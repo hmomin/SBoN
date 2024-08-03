@@ -135,7 +135,7 @@ def main() -> None:
     PseudoState = namedtuple(
         "PseudoState", ["device", "local_process_index", "is_main_process"]
     )
-    distributed_state = PseudoState(f"cuda:{args.device_id}", 0, True)
+    distributed_state = PseudoState(f"cuda:{args.device_id}", args.device_id, True)
     state_device = str(distributed_state.device)
     print(f"DEVICE: {state_device}")
     pprint(vars(args))
