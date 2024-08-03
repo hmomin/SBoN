@@ -14,7 +14,7 @@ batch_size=20
 seed=0
 top_k=50
 top_p=1.0
-device_ids=(3)
+device_ids=(0..7)
 
 for device_id in "${device_ids[@]}"
 do
@@ -31,4 +31,4 @@ do
     --device_id $device_id &
 done
 
-wait
+# wait
