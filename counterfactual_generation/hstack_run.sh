@@ -12,5 +12,89 @@ python -m counterfactual_generation.generate \
 --batch_size 20 \
 --seed 0 \
 --top_k 50 \
---top_p 1.0
---device_id 0
+--top_p 1.0 \
+--device_id 0 &
+
+python -m counterfactual_generation.generate \
+--data_filename ./datasets/alpaca_farm_100.json \
+--output_folder output_AF_gpt2-xl__20_1000_seed_0 \
+--llm_name gpt2-xl \
+--num_trajectories 1000 \
+--max_length 1024 \
+--batch_size 20 \
+--seed 0 \
+--top_k 50 \
+--top_p 1.0 \
+--device_id 1 &
+
+python -m counterfactual_generation.generate \
+--data_filename ./datasets/alpaca_farm_100.json \
+--output_folder output_AF_gpt2-xl__20_1000_seed_0 \
+--llm_name gpt2-xl \
+--num_trajectories 1000 \
+--max_length 1024 \
+--batch_size 20 \
+--seed 0 \
+--top_k 50 \
+--top_p 1.0 \
+--device_id 2 &
+
+python -m counterfactual_generation.generate \
+--data_filename ./datasets/alpaca_farm_100.json \
+--output_folder output_AF_gpt2-xl__20_1000_seed_0 \
+--llm_name gpt2-xl \
+--num_trajectories 1000 \
+--max_length 1024 \
+--batch_size 20 \
+--seed 0 \
+--top_k 50 \
+--top_p 1.0 \
+--device_id 3 &
+
+python -m counterfactual_generation.generate \
+--data_filename ./datasets/alpaca_farm_100.json \
+--output_folder output_AF_gpt2-xl__20_1000_seed_0 \
+--llm_name gpt2-xl \
+--num_trajectories 1000 \
+--max_length 1024 \
+--batch_size 20 \
+--seed 0 \
+--top_k 50 \
+--top_p 1.0 \
+--device_id 4 &
+
+python -m counterfactual_generation.generate \
+--data_filename ./datasets/alpaca_farm_100.json \
+--output_folder output_AF_gpt2-xl__20_1000_seed_0 \
+--llm_name gpt2-xl \
+--num_trajectories 1000 \
+--max_length 1024 \
+--batch_size 20 \
+--seed 0 \
+--top_k 50 \
+--top_p 1.0 \
+--device_id 5 &
+
+python -m counterfactual_generation.generate \
+--data_filename ./datasets/alpaca_farm_100.json \
+--output_folder output_AF_gpt2-xl__20_1000_seed_0 \
+--llm_name gpt2-xl \
+--num_trajectories 1000 \
+--max_length 1024 \
+--batch_size 20 \
+--seed 0 \
+--top_k 50 \
+--top_p 1.0 \
+--device_id 6 &
+
+python -m counterfactual_generation.generate \
+--data_filename ./datasets/alpaca_farm_100.json \
+--output_folder output_AF_gpt2-xl__20_1000_seed_0 \
+--llm_name gpt2-xl \
+--num_trajectories 1000 \
+--max_length 1024 \
+--batch_size 20 \
+--seed 0 \
+--top_k 50 \
+--top_p 1.0 \
+--device_id 7 &
