@@ -118,15 +118,25 @@ def get_args():
         action="store_true",
         default=False,
     )
+    parser.add_argument(
+        "--device_id",
+        help="which GPU to use",
+        type=int,
+        default=0,
+    )
     args = parser.parse_args()
     return args
 
 
 def main() -> None:
-    distributed_state = PartialState()
-    # NOTE: we will assert that only a single GPU is used for any script
-    assert str(distributed_state.device) == "cuda", "Only a single GPU is supported"
     args = get_args()
+    distributed_state = PartialState(
+        device=torch.device(f"cuda:{args.device_id}"),
+        local_process_index=args.device_id,
+        num_processes=1,
+        is_main_process=True,
+    )
+    state_device = str(distributed_state.device)
     pprint(vars(args))
 
     num_batches = int(np.ceil(args.num_trajectories / args.batch_size))
@@ -158,10 +168,11 @@ def main() -> None:
             args.pretty_print_output,
             args.record_memory,
         )
-        break  # NOTE: just stop after a single prompt - this prevents wasted computation
-        # elapsed_hours = (time() - start_time) / 3600
-        # if elapsed_hours > 2.5:
-        #     break
+        if state_device == "cuda":
+            break  # NOTE: just stop after a single prompt - this prevents wasted computation
+            # elapsed_hours = (time() - start_time) / 3600
+            # if elapsed_hours > 2.5:
+            #     break
         generation_prompts = get_generation_prompts(args)
     print("DONE")
 
