@@ -99,9 +99,9 @@ def get_output_texts(
             "<s> [INST]", "<s>[INST]"
         )  # for llama-2-chat-hf
         split_pieces = generation_text.split(prompt)
-        assert (
-            prompt in generation_text
-        ), f"prompt: {prompt} | generation_text: {generation_text}"
+        # NOTE: weird hack needed for an unrecognized prompt ending space
+        if len(split_pieces) == 1:
+            split_pieces = generation_text.split(prompt[1:])
         assert (
             len(split_pieces) > 1
         ), f"prompt: {prompt} | generation_text: {generation_text}, {len(split_pieces)}, {split_pieces}"
