@@ -131,7 +131,7 @@ def get_args():
 
 def main() -> None:
     args = get_args()
-    os.environ["CUDA_VISIBLE_DEVICES"] = args.device_id
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(args.device_id)
     PseudoState = namedtuple(
         "PseudoState", ["device", "local_process_index", "is_main_process"]
     )
