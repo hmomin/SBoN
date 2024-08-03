@@ -123,7 +123,7 @@ def get_args():
         "--device_id",
         help="which GPU to use",
         type=int,
-        default=0,
+        default=-1,
     )
     args = parser.parse_args()
     return args
@@ -135,7 +135,9 @@ def main() -> None:
     PseudoState = namedtuple(
         "PseudoState", ["device", "local_process_index", "is_main_process"]
     )
-    distributed_state = PseudoState(f"cuda:{args.device_id}", args.device_id, True)
+    distributed_state = PseudoState(
+        f"cuda{(':' + str(args.device_id)) if args.device_id > 0 else ''}", 0, True
+    )
     state_device = str(distributed_state.device)
     print(f"DEVICE: {state_device}")
     pprint(vars(args))
