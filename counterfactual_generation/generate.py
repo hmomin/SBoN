@@ -121,7 +121,7 @@ def get_args():
     parser.add_argument(
         "--device_id",
         help="which GPU to use",
-        type=int,
+        type=str,
         default="0",
     )
     args = parser.parse_args()
