@@ -122,7 +122,7 @@ def get_args():
         "--device_id",
         help="which GPU to use",
         type=int,
-        default=0,
+        default="0",
     )
     args = parser.parse_args()
     return args
@@ -130,12 +130,8 @@ def get_args():
 
 def main() -> None:
     args = get_args()
-    distributed_state = PartialState(
-        device=torch.device(f"cuda:{args.device_id}"),
-        local_process_index=args.device_id,
-        num_processes=1,
-        is_main_process=True,
-    )
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.device_id
+    distributed_state = PartialState()
     state_device = str(distributed_state.device)
     print(f"DEVICE: {state_device}")
     pprint(vars(args))
