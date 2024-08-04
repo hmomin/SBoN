@@ -297,7 +297,7 @@ def get_rewards(
             reward_list.extend(rewards)
     elif "reward-model-deberta-v3-large-v2" in reward_model_name:
         try:
-            reward_list = reward_model(**reward_tokens).logits.tolist()
+            reward_list = reward_model(**reward_tokens).logits.squeeze().tolist()
         except Exception as e:
             print(f"reward_tokens shape: {reward_tokens.input_ids.shape}")
             print("Error in reward_model forward pass - not scoring this batch...")
