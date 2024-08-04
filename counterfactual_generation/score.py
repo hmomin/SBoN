@@ -162,10 +162,13 @@ def compute_iterative_rewards(
     generation_length = output_tokens.shape[-1]
     score_indices = compute_score_indices(generation_length)
     for token_idx in score_indices:
-        partial_sequence = output_tokens[:, :token_idx]
-        output_text = generation_tokenizer.decode(
-            partial_sequence[0], skip_special_tokens=True
-        )
+        if token_idx == 0:
+            output_text = ""
+        else:
+            partial_sequence = output_tokens[:, :token_idx]
+            output_text = generation_tokenizer.decode(
+                partial_sequence[0], skip_special_tokens=True
+            )
         scores = compute_scores(
             question, [output_text], reward_model_name, reward_tokenizer, reward_model
         )
@@ -177,6 +180,8 @@ def compute_iterative_rewards(
 
 
 def compute_score_indices(generation_length: int) -> list[int]:
+    if generation_length == 0:
+        score_indices = [0]
     score_indices = [2 ** i for i in range(int(np.log2(generation_length)) + 1)]
     if score_indices[-1] < generation_length:
         score_indices.append(generation_length)
