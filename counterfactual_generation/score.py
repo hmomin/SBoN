@@ -181,7 +181,7 @@ def compute_iterative_rewards(
 
 def compute_score_indices(generation_length: int) -> list[int]:
     if generation_length == 0:
-        score_indices = [0]
+        return [0]
     score_indices = [2 ** i for i in range(int(np.log2(generation_length)) + 1)]
     if score_indices[-1] < generation_length:
         score_indices.append(generation_length)
