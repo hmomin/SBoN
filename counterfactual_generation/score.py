@@ -9,14 +9,23 @@ import json
 import numpy as np
 import os
 import random
+import secrets
 import time
 import torch
 import transformers
-from accelerate import PartialState
+from collections import namedtuple
+from copy import deepcopy
 from pprint import pprint
 from time import sleep
 from tqdm import tqdm
 from typing import Any
+from utils.reward_utils import (
+    get_reward_model,
+    get_reward_tokenizer,
+    get_rewards,
+    get_reward_tokens,
+)
+from utils.validation_utils import get_full_model_name
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
@@ -40,6 +49,12 @@ def get_args():
         help="how many trajectories to score in parallel per batch",
         type=int,
         default=1,
+    )
+    parser.add_argument(
+        "--device_id",
+        help="which GPU to use",
+        type=int,
+        default=-1,
     )
     args = parser.parse_args()
     return args
@@ -79,6 +94,18 @@ def remove_scored_generations(
     return remaining_basenames
 
 
+def get_other_args(args: argparse.Namespace, filepath: str) -> None:
+    generation_data = load_generation_data(filepath)
+    sample_batch = generation_data[0]
+    sample_batch.pop("trajectories")
+    sample_batch.pop("elapsed_sec")
+    sample_batch.pop("clock")
+    args.llm_name = sample_batch["llm_name"]
+    args.max_length = sample_batch["max_length"]
+    args.model_dir = sample_batch["model_dir"]
+    args.pretty_print_output = sample_batch["pretty_print_output"]
+
+
 def load_generation_data(filepath: str) -> list[dict[str, Any]]:
     print(f"Loading data from {filepath}...")
     with open(filepath, "r") as f:
@@ -86,18 +113,17 @@ def load_generation_data(filepath: str) -> list[dict[str, Any]]:
     return generation_data
 
 
-def fill_params(params: dict[str, Any], args: argparse.Namespace) -> None:
-    params["REWARD_MODEL_NAME"] = args.reward_model_name
-
-
-def rebatch_data(
+def rebatch_generation_data(
     generation_data: list[dict[str, Any]],
     batch_size: int,
     tokenizer,
 ) -> list[dict[str, Any]]:
     rebatched_data: list[dict[str, Any]] = []
-    relevant_batch_keys = get_batch_keys(generation_data)
-    rebatched_data.append(generation_data[0])
+    relevant_batch_keys = ["trajectories"]
+    args_batch: dict[str, Any] = deepcopy(generation_data[0])
+    args_batch.pop("trajectories")
+    rebatched_data.append(args_batch)
+
     input_token_ids = generation_data[1]["input_token_ids"]
     total_objects: dict[str, list[Any]] = {}
     total_length = 0
@@ -120,14 +146,6 @@ def rebatch_data(
         rebatched_data.append(new_batch)
         batch_counter += 1
     return rebatched_data
-
-
-def get_batch_keys(generation_data: list[dict[str, Any]]) -> list[str]:
-    sample_batch = generation_data[1]
-    batch_keys = list(sample_batch.keys())
-    batch_keys.remove("batch_idx")
-    batch_keys.remove("input_token_ids")
-    return batch_keys
 
 
 def get_packed_data(generation_data: list[dict[str, Any]], data_key: str) -> list[Any]:
@@ -263,10 +281,20 @@ def get_filename() -> str:
 
 def main() -> None:
     args = get_args()
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(args.device_id)
+    PseudoState = namedtuple(
+        "PseudoState", ["device", "local_process_index", "is_main_process"]
+    )
+    distributed_state = PseudoState(
+        f"cuda{(':' + str(args.device_id)) if args.device_id > 0 else ''}", 0, True
+    )
     output_folder = create_output_folder(args)
+    generation_filepaths = get_generation_filepaths(args, output_folder)
+    get_other_args(args, generation_filepaths[0])
+    pprint(args)
     print(f"Generation Model: {args.llm_name} - Reward Model: {args.reward_model_name}")
-    LLM_name = get_full_model_name(args.llm_name)
-    reward_model_name = get_full_model_name(args.reward_model_name)
+    LLM_name = get_full_model_name(args.model_dir, args.llm_name)
+    reward_model_name = get_full_model_name(args.model_dir, args.reward_model_name)
 
     generation_tokenizer = transformers.AutoTokenizer.from_pretrained(LLM_name)
     generation_tokenizer.pad_token = generation_tokenizer.eos_token
@@ -277,16 +305,18 @@ def main() -> None:
         reward_model_name, reward_tokenizer, distributed_state.device
     )
 
-    generation_filepaths = get_generation_filepaths(args, output_folder)
     while len(generation_filepaths) > 0:
-        generation_filepath = random.choice(generation_filepaths)
+        generation_filepath = secrets.choice(generation_filepaths)
         generation_data = load_generation_data(generation_filepath)
-        fill_params(generation_data[0], args)
-        prompt_dict: dict[str, Any] = generation_data[0]["PROMPT"]
+        pprint(list(generation_data[0].keys()))
+        prompt_dict: dict[str, Any] = generation_data[0]["prompt"]
+        pprint(prompt_dict)
         question: str = prompt_dict["prompt"]
-        generation_data = rebatch_data(
+        pprint(question)
+        generation_data = rebatch_generation_data(
             generation_data, args.batch_size, generation_tokenizer
         )
+        raise
         print(f"input_token_length: {len(generation_data[1]['input_token_ids'])}")
         num_trajectories_scored = 0
         for batch_data in tqdm(generation_data[1:]):
@@ -312,7 +342,7 @@ def main() -> None:
             if "reward_trajectories" in batch_data:
                 num_trajectories_scored += num_trajectories
         write_to_disk(generation_data, output_folder, args.pretty_print_output)
-        print(f"Scored {num_trajectories_scored} trajectories.")
+        print(f"Scored {num_trajectories_scored} trajectories.", flush=True)
         generation_filepaths = get_generation_filepaths(args, output_folder)
     print("DONE")
 

@@ -151,6 +151,8 @@ def main() -> None:
             job_created = create_new_job("A100", A100_index)
             if not job_created:
                 JOBS["A100"].pop(A100_index)
+                if A100_index >= len(JOBS["A100"]):
+                    A100_index = 0
             else:
                 A100_index = (
                     (A100_index + 1) % len(JOBS["A100"]) if len(JOBS["A100"]) > 0 else 0
@@ -159,6 +161,8 @@ def main() -> None:
             job_created = create_new_job("H100", H100_index)
             if not job_created:
                 JOBS["H100"].pop(H100_index)
+                if H100_index >= len(JOBS["H100"]):
+                    H100_index = 0
             else:
                 H100_index = (
                     (H100_index + 1) % len(JOBS["H100"]) if len(JOBS["H100"]) > 0 else 0

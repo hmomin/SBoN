@@ -58,5 +58,5 @@ def get_full_model_name(model_dir: str, model_basename: str) -> str:
             return BASENAME2HF[model_basename]
         else:
             raise Exception(f"Model directory not provided for {model_basename}")
-    print(f"loading model from {model_dir}/{model_basename}")
+    print(f"Loading model from {model_dir}/{model_basename}...")
     return f"{model_dir}/{model_basename}"
