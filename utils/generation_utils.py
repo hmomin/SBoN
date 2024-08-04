@@ -101,7 +101,7 @@ def get_output_texts(
         split_pieces = generation_text.split(prompt)
         # NOTE: weird hack needed for an unrecognized prompt ending space
         if len(split_pieces) == 1:
-            split_pieces = generation_text.split(prompt[1:])
+            split_pieces = generation_text.split(prompt[:-1])
         assert (
             len(split_pieces) > 1
         ), f"prompt: {prompt} | generation_text: {generation_text}, {len(split_pieces)}, {split_pieces}"
