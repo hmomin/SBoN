@@ -5,23 +5,53 @@ from time import sleep
 
 USERNAME = "my0049"
 
-# DATASET in ("./datasets/hh_rlhf_100.json", "./datasets/alpaca_farm_100.json")
-# LLM in ("gpt-j-6b", "Mistral-7B-v0.3", "Meta-Llama-3-8B")
-# RM in ("RM-Mistral-7B", "FsfairX-LLaMA3-RM-v0.1", "ArmoRM-Llama3-8B-v0.1")
+"""
+DATASET in (
+    "./datasets/hh_rlhf_100.json",
+    "./datasets/alpaca_farm_100.json",
+)
+LLM in (
+    "gpt2-xl",
+    "gpt-j-6b",
+    "Mistral-7B-v0.3",
+    "Meta-Llama-3-8B",
+)
+RM in (
+    "reward-model-deberta-v3-large-v2",
+    "RM-Mistral-7B",
+    "FsfairX-LLaMA3-RM-v0.1",
+    "ArmoRM-Llama3-8B-v0.1",
+)
+"""
 
 MAX_H100_GPUS = 16
 MAX_A100_JOBS = 0
-# JOB FORMAT: (DATA_FILENAME, LLM, RM, BATCH_SIZE, NUM_TRAJECTORIES, SEED)
+# JOB FORMAT: (DATA_FOLDER, REWARD_MODEL_NAME)
 JOBS = {
-    "A100": [
-        ("./datasets/alpaca_farm_100.json", "gpt-j-6b", "", 20, 1_000, 0),
-        ("./datasets/alpaca_farm_100.json", "Mistral-7B-v0.3", "", 20, 1_000, 0),
-        ("./datasets/alpaca_farm_100.json", "Meta-Llama-3-8B", "", 20, 1_000, 0),
-    ],
+    "A100": [],
     "H100": [
-        ("./datasets/alpaca_farm_100.json", "gpt-j-6b", "", 20, 1_000, 0),
-        ("./datasets/alpaca_farm_100.json", "Mistral-7B-v0.3", "", 20, 1_000, 0),
-        ("./datasets/alpaca_farm_100.json", "Meta-Llama-3-8B", "", 20, 1_000, 0),
+        # ("output_AF_gpt2-xl__20_1000_seed_0", "reward-model-deberta-v3-large-v2"),
+        # ("output_AF_gpt2-xl__20_1000_seed_0", "RM-Mistral-7B"),
+        # ("output_AF_gpt2-xl__20_1000_seed_0", "FsfairX-LLaMA3-RM-v0.1"),
+        # ("output_AF_gpt2-xl__20_1000_seed_0", "ArmoRM-Llama3-8B-v0.1"),
+        ("output_AF_gpt-j-6b__20_1000_seed_0", "reward-model-deberta-v3-large-v2"),
+        ("output_AF_gpt-j-6b__20_1000_seed_0", "RM-Mistral-7B"),
+        ("output_AF_gpt-j-6b__20_1000_seed_0", "FsfairX-LLaMA3-RM-v0.1"),
+        ("output_AF_gpt-j-6b__20_1000_seed_0", "ArmoRM-Llama3-8B-v0.1"),
+        (
+            "output_AF_Mistral-7B-v0.3__20_1000_seed_0",
+            "reward-model-deberta-v3-large-v2",
+        ),
+        ("output_AF_Mistral-7B-v0.3__20_1000_seed_0", "RM-Mistral-7B"),
+        ("output_AF_Mistral-7B-v0.3__20_1000_seed_0", "FsfairX-LLaMA3-RM-v0.1"),
+        ("output_AF_Mistral-7B-v0.3__20_1000_seed_0", "ArmoRM-Llama3-8B-v0.1"),
+        (
+            "output_AF_Meta-Llama-3-8B__20_1000_seed_0",
+            "reward-model-deberta-v3-large-v2",
+        ),
+        ("output_AF_Meta-Llama-3-8B__20_1000_seed_0", "RM-Mistral-7B"),
+        ("output_AF_Meta-Llama-3-8B__20_1000_seed_0", "FsfairX-LLaMA3-RM-v0.1"),
+        ("output_AF_Meta-Llama-3-8B__20_1000_seed_0", "ArmoRM-Llama3-8B-v0.1"),
     ],
 }
 
@@ -55,12 +85,12 @@ def get_gpu_count(queue_output: str) -> int:
 def create_new_job(cluster: str, idx: int) -> bool:
     job_list = JOBS[cluster]
     job_to_run = job_list[idx]
-    output_folder = get_output_folder_from_tuple(job_to_run, cluster)
+    output_folder = get_output_folder_from_tuple(job_to_run)
     if not os.path.exists(output_folder):
         os.mkdir(output_folder)
     if len(os.listdir(output_folder)) >= 100:
         return False
-    job_command = get_job_command_from_tuple(job_to_run, output_folder)
+    job_command = get_job_command_from_tuple(job_to_run)
     slurm_filename = f"{cluster}.slurm"
     try:
         slurm_contents = read_file(slurm_filename)
@@ -73,41 +103,17 @@ def create_new_job(cluster: str, idx: int) -> bool:
         return False
 
 
-def get_output_folder_from_tuple(job_tuple: tuple, cluster: str) -> str:
-    (
-        data_filename,
-        LLM_name,
-        RM_name,
-        batch_size,
-        num_trajectories,
-        seed,
-    ) = job_tuple
-    data_code = "AF" if "alpaca" in data_filename else "HH"
-    return f"output_{data_code}_{LLM_name}_{RM_name}_{batch_size}_{num_trajectories}_seed_{seed}"
+def get_output_folder_from_tuple(job_tuple: tuple) -> str:
+    (data_folder, RM_name) = job_tuple
+    return f"{data_folder}_{RM_name}"
 
 
-def get_job_command_from_tuple(job_tuple: tuple, output_folder: str) -> str:
-    (
-        data_filename,
-        LLM_name,
-        RM_name,
-        batch_size,
-        num_trajectories,
-        seed,
-    ) = job_tuple
-    max_length = 2_048 if any(s in LLM_name for s in ["sft10k", "gpt-j-6b"]) else 8_000
+def get_job_command_from_tuple(job_tuple: tuple) -> str:
+    (data_folder, RM_name) = job_tuple
     job_command = (
-        f"python -m counterfactual_generation.generate "
-        + f"--data_filename {data_filename} "
-        + f"--output_folder {output_folder} "
-        + f"--llm_name {LLM_name} "
-        + (f"--reward_model_name {RM_name} " if len(RM_name) > 0 else "")
-        + f"--num_trajectories {num_trajectories} "
-        + f"--max_length {max_length} "
-        + f"--batch_size {batch_size} "
-        + f"--seed {seed} "
-        + f"--top_k {50} "
-        + f"--top_p {1.0} "
+        f"python -m counterfactual_generation.score "
+        + f"--data_folder {data_folder} "
+        + f"--reward_model_name {RM_name} "
     )
     return job_command
 

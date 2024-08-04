@@ -42,12 +42,6 @@ def get_args():
         default="reward-model-deberta-v3-large-v2",
     )
     parser.add_argument(
-        "--batch_size",
-        help="how many trajectories to score in parallel per batch",
-        type=int,
-        default=1,
-    )
-    parser.add_argument(
         "--device_id",
         help="which GPU to use",
         type=int,
@@ -214,7 +208,6 @@ def get_filename() -> str:
 
 def main() -> None:
     args = get_args()
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(args.device_id)
     PseudoState = namedtuple(
         "PseudoState", ["device", "local_process_index", "is_main_process"]
     )
@@ -259,7 +252,7 @@ def main() -> None:
             )
             # NOTE: write to disk after the first batch to "hog" this prompt
             if num_trajectories_scored == 0:
-                write_to_disk(generation_data, output_folder, args.pretty_print_output)
+                write_to_disk([], output_folder, args.pretty_print_output)
             num_trajectories_scored += 1
         write_to_disk(generation_data, output_folder, args.pretty_print_output)
         print(f"Scored {num_trajectories_scored} trajectories.", flush=True)

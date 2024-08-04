@@ -160,7 +160,7 @@ def main() -> None:
             # NOTE: write to disk on the first batch to hog this prompt
             if batch_idx == 0:
                 write_to_disk(
-                    full_data,
+                    [],
                     output_folder,
                     generator.initial_memory,
                     args.pretty_print_output,
