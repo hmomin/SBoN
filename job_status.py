@@ -34,12 +34,12 @@ def main() -> None:
     while True:
         os.system("clear")
         schedule_output = subprocess.run(
-            ["squeue", "-u", USERNAME, "-S", "i", "--start"],
+            ["squeue", "-u", USERNAME, "-S", "P,i", "--start"],
             capture_output=True,
             text=True,
         )
         queue_output = subprocess.run(
-            ["squeue", "-u", USERNAME, "-S", "i"], capture_output=True, text=True
+            ["squeue", "-u", USERNAME, "-S", "P,i"], capture_output=True, text=True
         )
         print(schedule_output.stdout[:-1])
         print(queue_output.stdout[:-1])
