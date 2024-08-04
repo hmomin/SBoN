@@ -2,7 +2,7 @@
 
 while true; do
     clear
-    echo "$(date)"
+    echo "$(date +'%T')"
 
     # Loop through each folder in the current directory that starts with "output_"
     for dir in output_*/; do
@@ -11,7 +11,7 @@ while true; do
             # Count the number of files in the directory
             file_count=$(ls -1q "$dir" | wc -l)
             # Print the number of files in the directory
-            echo "$file_count files in ${dir%/}..."
+            echo "$file_count\tfiles in ${dir%/}"
         fi
     done
 
