@@ -7,9 +7,7 @@ from utils.generation_utils import (
     unpad_output_texts,
 )
 from utils.trajectory import Trajectory
-from utils.reward_utils import (
-    compute_scores,
-)
+from utils.reward_utils import compute_scores
 
 
 class BestOfN(Generator):

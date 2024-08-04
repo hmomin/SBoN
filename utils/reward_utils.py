@@ -20,6 +20,8 @@ def get_reward_tokenizer(reward_model_name: str, local_files_only: bool = True):
             legacy=False,
             local_files_only=local_files_only,
         )
+    elif "reward-model-deberta-v3-large-v2" in reward_model_name:
+        reward_tokenizer = transformers.AutoTokenizer.from_pretrained(reward_model_name)
     else:
         if "reward-model" in reward_model_name:
             reward_tokenizer = transformers.AutoTokenizer.from_pretrained(
@@ -87,6 +89,11 @@ def get_reward_model(
             ),
             local_files_only=local_files_only,
         ).to(device)
+    elif "reward-model-deberta-v3-large-v2" in reward_model_name:
+        reward_model = transformers.AutoModelForSequenceClassification.from_pretrained(
+            reward_model_name, torch_dtype=torch.bfloat16
+        )
+        reward_model.to(device)
     else:
         raise Exception(f"Invalid reward model name: {reward_model_name}")
     return reward_model
@@ -174,6 +181,16 @@ def get_reward_tokens(
             padding=True,
             max_length=reward_tokenizer.model_max_length,
             truncation=True,
+        ).to(device)
+        return reward_tokens
+    elif "reward-model-deberta-v3-large-v2" in reward_model_name:
+        batch_questions = [question] * len(output_texts)
+        assert len(batch_questions) == len(output_texts)
+        reward_tokens = reward_tokenizer(
+            batch_questions,
+            output_texts,
+            padding=True,
+            return_tensors="pt",
         ).to(device)
         return reward_tokens
     else:
@@ -278,6 +295,13 @@ def get_rewards(
             if type(rewards) == float:
                 rewards = [rewards]
             reward_list.extend(rewards)
+    elif "reward-model-deberta-v3-large-v2" in reward_model_name:
+        try:
+            reward_list = reward_model(**reward_tokens).logits.tolist()
+        except Exception as e:
+            print(f"reward_tokens shape: {reward_tokens.input_ids.shape}")
+            print("Error in reward_model forward pass - not scoring this batch...")
+            return
     else:
         raise Exception(f"Invalid reward model name: {reward_model_name}")
     if type(reward_list) == float:

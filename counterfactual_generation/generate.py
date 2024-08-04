@@ -1,13 +1,8 @@
-# NOTE: this file can be used to do generation with any model supported by vLLM,
-# including:
-# gpt2
-# sft10k (from Alpaca Farm)
-# Llama-2-7b-hf
-# Llama-2-7b-chat-hf
+# NOTE: this file is used to do generation with the following models:
+# gpt2-xl
+# gpt-j-6b
+# Mistral-7B-v0.3
 # Meta-Llama-3-8B
-# Meta-Llama-3-8B-Instruct
-# Mistral-7B-v0.1
-# Mistral-7B-Instruct-v0.1
 
 import argparse
 import gc
@@ -15,7 +10,6 @@ import numpy as np
 import os
 import secrets
 import torch
-from accelerate import PartialState
 from best_of_n import BestOfN
 from collections import namedtuple
 from pprint import pprint
@@ -156,13 +150,22 @@ def main() -> None:
         prompt_dict = secrets.choice(generation_prompts)
         pprint(prompt_dict)
         prompt: str = prompt_dict["prompt"]
-        for _ in range(num_batches):
+        for batch_idx in range(num_batches):
             generator.generate(prompt, prompt_dict=prompt_dict)
             full_data.extend(generator.all_data)
 
             gc.collect()
             torch.cuda.empty_cache()
             torch.cuda.synchronize()
+            # NOTE: write to disk on the first batch to hog this prompt
+            if batch_idx == 0:
+                write_to_disk(
+                    full_data,
+                    output_folder,
+                    generator.initial_memory,
+                    args.pretty_print_output,
+                    args.record_memory,
+                )
 
         write_to_disk(
             full_data,
