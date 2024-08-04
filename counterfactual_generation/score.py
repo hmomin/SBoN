@@ -252,7 +252,11 @@ def main() -> None:
             )
             # NOTE: write to disk after the first batch to "hog" this prompt
             if num_trajectories_scored == 0:
-                write_to_disk([], output_folder, args.pretty_print_output)
+                write_to_disk(
+                    [{"prompt": generation_data[0]["prompt"]}],
+                    output_folder,
+                    args.pretty_print_output,
+                )
             num_trajectories_scored += 1
         write_to_disk(generation_data, output_folder, args.pretty_print_output)
         print(f"Scored {num_trajectories_scored} trajectories.", flush=True)
