@@ -11,7 +11,7 @@ while true; do
             # Count the number of files in the directory
             file_count=$(ls -1q "$dir" | wc -l)
             # Print the number of files in the directory
-            echo "$file_count\tfiles in ${dir%/}"
+            echo -e "$file_count\tfiles in ${dir%/}"
         fi
     done
 
