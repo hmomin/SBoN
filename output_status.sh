@@ -15,6 +15,11 @@ while true; do
 
     echo "Number of 'python -m' processes: $count"
 
+    # Print each matching process starting from 'python -m'
+    echo "$filtered_list" | while read -r line; do
+        echo "$line" | grep -o 'python -m.*'
+    done
+
     # Loop through each folder in the current directory that starts with "output_"
     for dir in output_*/; do
         # Check if the item is a directory
