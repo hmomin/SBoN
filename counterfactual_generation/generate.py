@@ -10,7 +10,7 @@ import numpy as np
 import os
 import secrets
 import torch
-from best_of_n import BestOfN
+from algorithm.best_of_n import BestOfN
 from collections import namedtuple
 from pprint import pprint
 from time import time
