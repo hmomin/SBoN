@@ -8,7 +8,7 @@ from counterfactual_analysis.trajectory import (
     get_batch_stats,
     get_total_tokens,
 )
-from counterfactual_analysis.trial import Trial
+from counterfactual_analysis.trial import Trial, TrialCollector
 from copy import deepcopy
 from glob import glob
 from pprint import pprint
@@ -97,8 +97,8 @@ def main() -> None:
     filepaths = get_filepaths(data_folder)
     filed_trajectories, decision_tokens = get_all_trajectories(filepaths)
 
-    all_trials: list[Trial] = []
-    for trial_idx in tqdm(range(args.num_trials)):
+    trial_collector = TrialCollector(rejection_rates, decision_tokens)
+    for _ in tqdm(range(args.num_trials)):
         for trajectories in filed_trajectories:
             sampled_trajectories = random.choices(trajectories, k=args.num_samples)
             bon_tokens = get_total_tokens(sampled_trajectories)
@@ -118,8 +118,8 @@ def main() -> None:
                     )
                     sbon_tokens, sbon_max_score = counterfactual_test.run()
                     trial.update(sbon_tokens, sbon_max_score)
-                    all_trials.append(trial)
-    pprint(all_trials)
+                    trial_collector.add_trial(trial)
+    trial_collector.consolidate_stats()
 
 
 if __name__ == "__main__":

@@ -28,3 +28,37 @@ class Trial(object):
     ) -> None:
         self.sbon_tokens = sbon_tokens
         self.sbon_max_score = sbon_max_score
+
+
+class TrialCollector(object):
+    def __init__(
+        self, rejection_rates: list[float], decision_tokens: list[int]
+    ) -> None:
+        self.trial_collection: dict[str, list[Trial]] = {}
+        for rejection_rate in rejection_rates:
+            for decision_token in decision_tokens:
+                key = f"{rejection_rate}_{decision_token}"
+                self.trial_collection[key] = []
+
+    def __repr__(self) -> str:
+        return f"TrialCollector(\n    trial_collection: {self.trial_collection}\n)"
+
+    def add_trial(self, trial: Trial) -> None:
+        key = f"{trial.rejection_rate}_{trial.decision_token}"
+        self.trial_collection[key].append(trial)
+
+    def consolidate_stats(self) -> None:
+        for key, trials in self.trial_collection.items():
+            bon_tokens = 0
+            sbon_tokens = 0
+            suboptimalities: list[float] = []
+            for trial in trials:
+                print(trial)
+                raise
+                bon_tokens += trial.bon_tokens
+                bon_max_score = max(bon_max_score, trial.bon_max_score)
+                sbon_tokens += trial.sbon_tokens
+                sbon_max_score = max(sbon_max_score, trial.sbon_max_score)
+            print(
+                f"key: {key}, bon_tokens: {bon_tokens}, bon_max_score: {bon_max_score}, sbon_tokens: {sbon_tokens}, sbon_max_score: {sbon_max_score}"
+            )
