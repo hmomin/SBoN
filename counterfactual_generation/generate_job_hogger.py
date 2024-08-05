@@ -13,15 +13,11 @@ MAX_H100_GPUS = 16
 MAX_A100_JOBS = 0
 # JOB FORMAT: (DATA_FILENAME, LLM, RM, BATCH_SIZE, NUM_TRAJECTORIES, SEED)
 JOBS = {
-    "A100": [
-        # ("./datasets/alpaca_farm_100.json", "gpt-j-6b", "", 20, 1_000, 0),
-        # ("./datasets/alpaca_farm_100.json", "Mistral-7B-v0.3", "", 20, 1_000, 0),
-        # ("./datasets/alpaca_farm_100.json", "Meta-Llama-3-8B", "", 20, 1_000, 0),
-    ],
+    "A100": [],
     "H100": [
-        ("./datasets/alpaca_farm_100.json", "gpt-j-6b", "", 20, 1_000, 0),
-        ("./datasets/alpaca_farm_100.json", "Mistral-7B-v0.3", "", 20, 1_000, 0),
-        ("./datasets/alpaca_farm_100.json", "Meta-Llama-3-8B", "", 20, 1_000, 0),
+        ("./datasets/hh_rlhf_100.json", "Meta-Llama-3-8B", "", 20, 1_000, 0),
+        ("./datasets/hh_rlhf_100.json", "gpt-j-6b", "", 20, 1_000, 0),
+        ("./datasets/hh_rlhf_100.json", "Mistral-7B-v0.3", "", 20, 1_000, 0),
     ],
 }
 
@@ -164,9 +160,11 @@ def main() -> None:
                 if H100_index >= len(JOBS["H100"]):
                     H100_index = 0
             else:
-                H100_index = (
-                    (H100_index + 1) % len(JOBS["H100"]) if len(JOBS["H100"]) > 0 else 0
-                )
+                # FIXME: here, we just keep running the same job over and over
+                # H100_index = (
+                #     (H100_index + 1) % len(JOBS["H100"]) if len(JOBS["H100"]) > 0 else 0
+                # )
+                pass
         sleep(10)
         queue_output = get_queue_output()
         A100_running_jobs = queue_output.count("A100")
