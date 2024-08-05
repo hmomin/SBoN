@@ -23,8 +23,15 @@ def plot_data(data: list[tuple[float, int, float, float]]) -> None:
         index="Rejection rate", columns="Decision token", values="Average score"
     )
 
+    # Function to determine text color based on background color
+    def get_text_color(value, threshold):
+        return "white" if value < threshold else "black"
+
     # Plot the heatmaps
     fig, axes = plt.subplots(ncols=2, figsize=(15, 6))
+
+    # Set font size
+    plt.rcParams.update({"font.size": 14})
 
     # Plot the Average token rate heatmap
     im1 = axes[0].imshow(pivot_token_rate, aspect="auto", cmap="viridis")
@@ -37,16 +44,22 @@ def plot_data(data: list[tuple[float, int, float, float]]) -> None:
     axes[0].set_yticklabels(pivot_token_rate.index)
 
     # Add text annotations
+    threshold_token_rate = 0.5  # Threshold for changing text color
     for i in range(len(pivot_token_rate.index)):
         for j in range(len(pivot_token_rate.columns)):
+            color = get_text_color(pivot_token_rate.iloc[i, j], threshold_token_rate)
             text = axes[0].text(
                 j,
                 i,
                 f"{pivot_token_rate.iloc[i, j]:.3f}",
                 ha="center",
                 va="center",
-                color="black",
+                color=color,
             )
+
+    # Remove black border
+    for spine in axes[0].spines.values():
+        spine.set_visible(False)
 
     fig.colorbar(im1, ax=axes[0])
 
@@ -61,16 +74,22 @@ def plot_data(data: list[tuple[float, int, float, float]]) -> None:
     axes[1].set_yticklabels(pivot_score.index)
 
     # Add text annotations
+    threshold_score = 90  # Threshold for changing text color
     for i in range(len(pivot_score.index)):
         for j in range(len(pivot_score.columns)):
+            color = get_text_color(pivot_score.iloc[i, j], threshold_score)
             text = axes[1].text(
                 j,
                 i,
                 f"{pivot_score.iloc[i, j]:.1f}",
                 ha="center",
                 va="center",
-                color="black",
+                color=color,
             )
+
+    # Remove black border
+    for spine in axes[1].spines.values():
+        spine.set_visible(False)
 
     fig.colorbar(im2, ax=axes[1])
 
