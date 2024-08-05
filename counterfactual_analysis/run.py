@@ -2,6 +2,7 @@ import argparse
 import json
 import numpy as np
 import random
+from counterfactual_analysis.plotter import plot_data
 from counterfactual_analysis.simple_rejection import SimpleRejection
 from counterfactual_analysis.trajectory import (
     Trajectory,
@@ -15,8 +16,8 @@ from pprint import pprint
 from tqdm import tqdm
 from typing import Any
 
-
 rejection_rates = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.95, 0.98]
+# rejection_rates = [0.10, 0.50, 0.90]  # FIXME!!!
 
 
 def get_args() -> argparse.Namespace:
@@ -120,6 +121,7 @@ def main() -> None:
                     trial.update(sbon_tokens, sbon_max_score)
                     trial_collector.add_trial(trial)
     trial_collector.consolidate_stats()
+    plot_data(trial_collector.stats)
 
 
 if __name__ == "__main__":

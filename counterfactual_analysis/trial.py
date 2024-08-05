@@ -1,4 +1,5 @@
 import numpy as np
+from pprint import pprint
 
 
 class Trial(object):
@@ -48,17 +49,29 @@ class TrialCollector(object):
         self.trial_collection[key].append(trial)
 
     def consolidate_stats(self) -> None:
+        self.stats: list[tuple[float, int, float, float]] = []
         for key, trials in self.trial_collection.items():
             bon_tokens = 0
             sbon_tokens = 0
-            suboptimalities: list[float] = []
+            suboptimality_scores: list[float] = []
             for trial in trials:
-                print(trial)
-                raise
                 bon_tokens += trial.bon_tokens
-                bon_max_score = max(bon_max_score, trial.bon_max_score)
                 sbon_tokens += trial.sbon_tokens
-                sbon_max_score = max(sbon_max_score, trial.sbon_max_score)
-            print(
-                f"key: {key}, bon_tokens: {bon_tokens}, bon_max_score: {bon_max_score}, sbon_tokens: {sbon_tokens}, sbon_max_score: {sbon_max_score}"
+                suboptimality_score = (
+                    1
+                    - (trial.bon_max_score - trial.sbon_max_score)
+                    / trial.absolute_difference
+                ) * 100
+                suboptimality_scores.append(suboptimality_score)
+            average_token_rate = sbon_tokens / bon_tokens
+            average_score = float(np.mean(suboptimality_scores))
+            rejection_rate_str, decision_token_str = key.split("_")
+            self.stats.append(
+                (
+                    float(rejection_rate_str),
+                    int(decision_token_str),
+                    average_token_rate,
+                    average_score,
+                )
             )
+        pprint(self.stats)
