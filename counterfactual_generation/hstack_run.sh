@@ -16,14 +16,14 @@ RM_names=(
     "ArmoRM-Llama3-8B-v0.1"
 )
 device_ids=(
-    # 0
-    # 1
-    # 2
-    # 3
-    4
-    5
-    6
-    7
+    0
+    1
+    2
+    3
+    # 4
+    # 5
+    # 6
+    # 7
 )
 
 index=0
