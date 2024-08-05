@@ -3,7 +3,9 @@ import numpy as np
 import pandas as pd
 
 
-def plot_data(data: list[tuple[float, int, float, float]]) -> None:
+def plot_data(idx: int, data: list[tuple[float, int, float, float]]) -> None:
+    plt.close("all")
+
     # Convert data to DataFrame
     df = pd.DataFrame(
         data,
@@ -28,20 +30,26 @@ def plot_data(data: list[tuple[float, int, float, float]]) -> None:
         return "white" if value < threshold else "black"
 
     # Plot the heatmaps
-    fig, axes = plt.subplots(ncols=2, figsize=(15, 6))
+    fig, axes = plt.subplots(ncols=2, figsize=(19, 10))
+
+    # Get the current figure manager
+    manager = plt.get_current_fig_manager()
+
+    # Set the position and size of the figure (widthxheight+x+y)
+    manager.window.wm_geometry("+0+0")
 
     # Set font size
     plt.rcParams.update({"font.size": 14})
 
     # Plot the Average token rate heatmap
     im1 = axes[0].imshow(pivot_token_rate, aspect="auto", cmap="viridis")
-    axes[0].set_title("Average token rate")
-    axes[0].set_xlabel("Decision token")
-    axes[0].set_ylabel("Rejection rate")
+    axes[0].set_title("Average token rate", fontsize=14)
+    axes[0].set_xlabel("Decision token", fontsize=14)
+    axes[0].set_ylabel("Rejection rate", fontsize=14)
     axes[0].set_xticks(np.arange(len(pivot_token_rate.columns)))
-    axes[0].set_xticklabels(pivot_token_rate.columns)
+    axes[0].set_xticklabels(pivot_token_rate.columns, fontsize=12)
     axes[0].set_yticks(np.arange(len(pivot_token_rate.index)))
-    axes[0].set_yticklabels(pivot_token_rate.index)
+    axes[0].set_yticklabels(pivot_token_rate.index, fontsize=12)
 
     # Add text annotations
     threshold_token_rate = 0.5  # Threshold for changing text color
@@ -61,17 +69,19 @@ def plot_data(data: list[tuple[float, int, float, float]]) -> None:
     for spine in axes[0].spines.values():
         spine.set_visible(False)
 
-    fig.colorbar(im1, ax=axes[0])
+    # Remove colorbar border
+    cbar1 = fig.colorbar(im1, ax=axes[0])
+    cbar1.outline.set_visible(False)
 
     # Plot the Average score heatmap
     im2 = axes[1].imshow(pivot_score, aspect="auto", cmap="inferno")
-    axes[1].set_title("Average score")
-    axes[1].set_xlabel("Decision token")
-    axes[1].set_ylabel("Rejection rate")
+    axes[1].set_title("Average score", fontsize=14)
+    axes[1].set_xlabel("Decision token", fontsize=14)
+    axes[1].set_ylabel("Rejection rate", fontsize=14)
     axes[1].set_xticks(np.arange(len(pivot_score.columns)))
-    axes[1].set_xticklabels(pivot_score.columns)
+    axes[1].set_xticklabels(pivot_score.columns, fontsize=12)
     axes[1].set_yticks(np.arange(len(pivot_score.index)))
-    axes[1].set_yticklabels(pivot_score.index)
+    axes[1].set_yticklabels(pivot_score.index, fontsize=12)
 
     # Add text annotations
     threshold_score = 90  # Threshold for changing text color
@@ -91,7 +101,10 @@ def plot_data(data: list[tuple[float, int, float, float]]) -> None:
     for spine in axes[1].spines.values():
         spine.set_visible(False)
 
-    fig.colorbar(im2, ax=axes[1])
+    # Remove colorbar border
+    cbar2 = fig.colorbar(im2, ax=axes[1])
+    cbar2.outline.set_visible(False)
 
+    plt.title(f"Trial {idx}")
     plt.tight_layout()
     plt.show()

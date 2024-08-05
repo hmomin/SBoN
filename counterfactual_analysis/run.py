@@ -1,5 +1,6 @@
 import argparse
 import json
+import multiprocessing as mp
 import numpy as np
 import random
 from counterfactual_analysis.plotter import plot_data
@@ -92,6 +93,7 @@ def get_decision_tokens(max_length: int) -> list[int]:
 
 
 def main() -> None:
+    process = None
     args = get_args()
     set_seed(args.seed)
     data_folder: str = args.data_folder
@@ -99,7 +101,7 @@ def main() -> None:
     filed_trajectories, decision_tokens = get_all_trajectories(filepaths)
 
     trial_collector = TrialCollector(rejection_rates, decision_tokens)
-    for _ in tqdm(range(args.num_trials)):
+    for trial_idx in tqdm(range(args.num_trials)):
         for trajectories in filed_trajectories:
             sampled_trajectories = random.choices(trajectories, k=args.num_samples)
             bon_tokens = get_total_tokens(sampled_trajectories)
@@ -120,8 +122,15 @@ def main() -> None:
                     sbon_tokens, sbon_max_score = counterfactual_test.run()
                     trial.update(sbon_tokens, sbon_max_score)
                     trial_collector.add_trial(trial)
-    trial_collector.consolidate_stats()
-    plot_data(trial_collector.stats)
+        trial_collector.consolidate_stats()
+        if process is not None and process.is_alive():
+            process.terminate()
+            process.join()
+        process = mp.Process(target=plot_data, args=(trial_idx, trial_collector.stats))
+        process.start()
+
+    if process is not None:
+        process.join()
 
 
 if __name__ == "__main__":

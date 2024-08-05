@@ -74,4 +74,3 @@ class TrialCollector(object):
                     average_score,
                 )
             )
-        pprint(self.stats)
