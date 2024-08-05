@@ -1,6 +1,5 @@
 import argparse
 import json
-import multiprocessing as mp
 import numpy as np
 import random
 from counterfactual_analysis.plotter import plot_data
@@ -18,7 +17,6 @@ from tqdm import tqdm
 from typing import Any
 
 rejection_rates = [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 0.95, 0.98]
-# rejection_rates = [0.10, 0.50, 0.90]  # FIXME!!!
 
 
 def get_args() -> argparse.Namespace:
@@ -33,7 +31,7 @@ def get_args() -> argparse.Namespace:
         "--num_trials",
         help="number of trials to perform for each prompt",
         type=int,
-        default=500,
+        default=1000,
     )
     parser.add_argument(
         "--num_samples",
@@ -93,7 +91,6 @@ def get_decision_tokens(max_length: int) -> list[int]:
 
 
 def main() -> None:
-    process = None
     args = get_args()
     set_seed(args.seed)
     data_folder: str = args.data_folder
@@ -122,15 +119,8 @@ def main() -> None:
                     sbon_tokens, sbon_max_score = counterfactual_test.run()
                     trial.update(sbon_tokens, sbon_max_score)
                     trial_collector.add_trial(trial)
-        trial_collector.consolidate_stats()
-        if process is not None and process.is_alive():
-            process.terminate()
-            process.join()
-        process = mp.Process(target=plot_data, args=(trial_idx, trial_collector.stats))
-        process.start()
-
-    if process is not None:
-        process.join()
+    output_filename = trial_collector.consolidate_stats(args)
+    plot_data(output_filename)
 
 
 if __name__ == "__main__":

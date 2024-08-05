@@ -1,7 +1,7 @@
 archive/
 slurm-*.out
 out_slurm/
-output_*/
+output_*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

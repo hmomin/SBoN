@@ -1,3 +1,5 @@
+import argparse
+import json
 import numpy as np
 from pprint import pprint
 
@@ -48,7 +50,7 @@ class TrialCollector(object):
         key = f"{trial.rejection_rate}_{trial.decision_token}"
         self.trial_collection[key].append(trial)
 
-    def consolidate_stats(self) -> None:
+    def consolidate_stats(self, args: argparse.Namespace) -> str:
         self.stats: list[tuple[float, int, float, float]] = []
         for key, trials in self.trial_collection.items():
             bon_tokens = 0
@@ -74,3 +76,11 @@ class TrialCollector(object):
                     average_score,
                 )
             )
+        output_filename = self.save_data(args)
+        return output_filename
+
+    def save_data(self, args: argparse.Namespace) -> str:
+        output_filename = f"{args.data_folder}_trials_{args.num_trials}_samples_{args.num_samples}_seed_{args.seed}.json"
+        with open(output_filename, "w") as f:
+            json.dump(self.stats, f, indent=4)
+        return output_filename
