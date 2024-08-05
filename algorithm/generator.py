@@ -2,7 +2,7 @@ import torch
 import transformers
 from accelerate import PartialState
 from argparse import Namespace
-from clock import Clock
+from algorithm.clock import Clock
 from copy import deepcopy
 from typing import Any
 from utils.generation_utils import (

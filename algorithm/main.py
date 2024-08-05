@@ -1,22 +1,10 @@
-# NOTE: this file can be used to do generation with the following models:
-# sft10k (from Alpaca Farm)
-# Meta-Llama-3-8B
-# Meta-Llama-3-8B-Instruct
-
-# NOTE: this file currently supports scoring with the following reward models:
-# reward-model-human (from Alpaca Farm)
-# reward-model-sim (from Alpaca Farm)
-# RM-Mistral-7B
-# FsfairX-LLaMA3-RM-v0.1
-# Eurus-RM-7b
-
 import argparse
 import torch
 from accelerate import PartialState
 from accelerate.utils import gather_object
-from best_of_n import BestOfN
+from algorithm.best_of_n import BestOfN
 from pprint import pprint
-from speculative_rejection import SpeculativeRejection
+from algorithm.speculative_rejection import SpeculativeRejection
 from utils.read_write_utils import (
     create_output_folder,
     get_generation_prompts,

@@ -1,5 +1,5 @@
 import torch
-from generator import Generator
+from algorithm.generator import Generator
 from utils.generation_utils import (
     get_input_encoding,
     get_output_texts,
