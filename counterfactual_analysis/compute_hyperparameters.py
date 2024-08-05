@@ -2,9 +2,7 @@ import argparse
 import json
 import os
 from counterfactual_analysis.run import get_filepaths
-from glob import glob
 from pprint import pprint
-from typing import Any
 
 
 def get_args() -> argparse.Namespace:
@@ -42,6 +40,7 @@ def get_model_names_from_filename(filepath: str) -> tuple[str, str]:
 def main() -> None:
     args = get_args()
     filepaths = get_filepaths(args.data_folder)
+    hyperparameter_print = ["*" * 80]
     for filepath in filepaths:
         lowest_token_rate = 2.0
         best_rejection_rate = -1.0
@@ -55,12 +54,16 @@ def main() -> None:
                 best_rejection_rate = rejection_rate
                 best_decision_token = decision_token
                 associated_score = score
-        print(f"{lm_name} + {rm_name}")
-        print(f"Rejection Rate: {best_rejection_rate}")
-        print(f"Decision Token: {best_decision_token}")
-        print(f"Token Rate:     {lowest_token_rate:.3f}")
-        print(f"Score:          {associated_score:.1f}")
-        print("*" * 80)
+        hyperparameter_print.append(f"{lm_name} + {rm_name}")
+        hyperparameter_print.append(f"Rejection Rate: {best_rejection_rate}")
+        hyperparameter_print.append(f"Decision Token: {best_decision_token}")
+        hyperparameter_print.append(f"Token Rate:     {lowest_token_rate:.3f}")
+        hyperparameter_print.append(f"Score:          {associated_score:.1f}")
+        hyperparameter_print.append("*" * 80)
+    full_print = "\n".join(hyperparameter_print)
+    print(full_print)
+    with open(os.path.join(args.data_folder, "hyperparameters.txt"), "w") as f:
+        f.write(full_print)
 
 
 if __name__ == "__main__":
