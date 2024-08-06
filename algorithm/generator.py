@@ -60,19 +60,25 @@ class Generator(object):
 
         if self.should_score:
             validate_reward_model_name(args.reward_model_name)
+
+            if args.reward_model_name == "perplexity":
+                self.reward_tokenizer = self.generation_tokenizer
+                self.reward_model = self.generation_model
+            else:
+                self.reward_tokenizer = get_reward_tokenizer(
+                    reward_model_name, local_files_only=args.local_files_only
+                )
+                self.reward_model = get_reward_model(
+                    reward_model_name,
+                    self.reward_tokenizer,
+                    distributed_state.device,
+                    local_files_only=args.local_files_only,
+                )
+
             reward_model_name = get_full_model_name(
                 args.model_dir, args.reward_model_name
             )
             self.reward_model_name = reward_model_name
-            self.reward_tokenizer = get_reward_tokenizer(
-                reward_model_name, local_files_only=args.local_files_only
-            )
-            self.reward_model = get_reward_model(
-                reward_model_name,
-                self.reward_tokenizer,
-                distributed_state.device,
-                local_files_only=args.local_files_only,
-            )
 
         self.templated_prompt = ""
 
