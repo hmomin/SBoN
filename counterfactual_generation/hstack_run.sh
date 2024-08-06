@@ -63,7 +63,7 @@ python -m algorithm.main \
 --seed 0 \
 --top_k 50 \
 --top_p 1.0 \
---temperature 1.0
+--temperature 1.0 \
 --device_id 4 &
 
 python -m algorithm.main \
@@ -80,7 +80,7 @@ python -m algorithm.main \
 --seed 0 \
 --top_k 50 \
 --top_p 1.0 \
---temperature 1.0
+--temperature 1.0 \
 --device_id 5 &
 
 python -m algorithm.main \
@@ -97,7 +97,7 @@ python -m algorithm.main \
 --seed 0 \
 --top_k 50 \
 --top_p 1.0 \
---temperature 1.0
+--temperature 1.0 \
 --device_id 6 &
 
 python -m algorithm.main \
@@ -114,7 +114,7 @@ python -m algorithm.main \
 --seed 0 \
 --top_k 50 \
 --top_p 1.0 \
---temperature 1.0
+--temperature 1.0 \
 --device_id 7 &
 
 # wait
