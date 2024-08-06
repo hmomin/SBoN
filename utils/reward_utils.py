@@ -1,6 +1,7 @@
 import numpy as np
 import transformers
 import torch
+import torch.nn.functional as F
 from .alpaca_farm.reward_model import RewardModel, RewardConfig
 from .generation_utils import get_templated_prompt
 
@@ -334,7 +335,21 @@ def calculate_batch_perplexity(
         )
         loss = outputs.loss
         perplexity = torch.exp(loss)
+        print(f"perplexity via loss way: {perplexity}")
+        logits = outputs.logits
+        probs = F.softmax(logits, dim=-1)
+        log_probs = torch.log(probs)
+        print(log_probs.shape)
+        labels = input_encoding.input_ids
+        print(labels.shape)
+        # Using gather to retrieve the logits corresponding to the labels
+        sequence_log_probs = torch.gather(logits, 2, labels.unsqueeze(-1)).squeeze(-1)
+        print(sequence_log_probs.shape)
+        test_perp = torch.exp(-torch.mean(sequence_log_probs))
+        print(f"perplexity via log probs way: {test_perp}")
+        raise Exception("STOP HERE")
         perplexities.append(perplexity.item())
+
     return perplexities
 
 
