@@ -1,4 +1,28 @@
 ********************************************************************************
+gpt-j-6b + ArmoRM-Llama3-8B-v0.1
+Rejection Rate: 0.8
+Decision Token: 128
+Token Rate:     0.311
+Score:          99.5
+********************************************************************************
+gpt-j-6b + FsfairX-LLaMA3-RM-v0.1
+Rejection Rate: 0.7
+Decision Token: 128
+Token Rate:     0.407
+Score:          99.1
+********************************************************************************
+gpt-j-6b + reward-model-deberta-v3-large-v2
+Rejection Rate: 0.7
+Decision Token: 128
+Token Rate:     0.399
+Score:          99.0
+********************************************************************************
+gpt-j-6b + RM-Mistral-7B
+Rejection Rate: 0.8
+Decision Token: 128
+Token Rate:     0.330
+Score:          99.3
+********************************************************************************
 gpt2-xl + ArmoRM-Llama3-8B-v0.1
 Rejection Rate: 0.8
 Decision Token: 128
