@@ -2,6 +2,8 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from glob import glob
+from tqdm import tqdm
 
 
 def load_data_from_file(file_path: str) -> list[tuple[float, int, float, float]]:
@@ -122,3 +124,13 @@ def plot_data(output_filename: str) -> None:
     plt.tight_layout()
     plt.savefig(f"{output_filename[:-5]}.png", dpi=300)
     # plt.show()
+
+
+def main() -> None:
+    json_filepaths = glob("./counterfactual_analysis/processed/*.json")
+    for json_filepath in tqdm(json_filepaths):
+        plot_data(json_filepath)
+
+
+if __name__ == "__main__":
+    main()

@@ -21,10 +21,11 @@ RM in (
     "RM-Mistral-7B",
     "FsfairX-LLaMA3-RM-v0.1",
     "ArmoRM-Llama3-8B-v0.1",
+    "perplexity",
 )
 """
 
-MAX_H100_GPUS = 8
+MAX_H100_GPUS = 16
 MAX_A100_JOBS = 0
 # JOB FORMAT: (DATASET, LLM, RM, NUM_TRAJECTORIES, BATCH_SIZE, DECISION_TOKEN, REJECTION_RATE)
 JOBS = {
@@ -32,75 +33,8 @@ JOBS = {
     "H100": [
         (
             "./datasets/alpaca_farm_100.json",
-            "gpt-j-6b",
-            "ArmoRM-Llama3-8B-v0.1",
-            100,
-            20,
-            128,
-            0.8,
-        ),
-        (
-            "./datasets/alpaca_farm_100.json",
-            "gpt-j-6b",
-            "FsfairX-LLaMA3-RM-v0.1",
-            100,
-            20,
-            128,
-            0.7,
-        ),
-        (
-            "./datasets/alpaca_farm_100.json",
-            "gpt-j-6b",
-            "reward-model-deberta-v3-large-v2",
-            100,
-            20,
-            128,
-            0.7,
-        ),
-        (
-            "./datasets/alpaca_farm_100.json",
-            "gpt-j-6b",
-            "RM-Mistral-7B",
-            100,
-            20,
-            128,
-            0.8,
-        ),
-        # ("./datasets/alpaca_farm_100.json", "gpt2-xl", "ArmoRM-Llama3-8B-v0.1", 100, 20, 128, 0.8),
-        # ("./datasets/alpaca_farm_100.json", "gpt2-xl", "FsfairX-LLaMA3-RM-v0.1", 100, 20, 128, 0.7),
-        # ("./datasets/alpaca_farm_100.json", "gpt2-xl", "reward-model-deberta-v3-large-v2", 100, 20, 256, 0.8),
-        # ("./datasets/alpaca_farm_100.json", "gpt2-xl", "RM-Mistral-7B", 100, 20, 128, 0.8),
-        (
-            "./datasets/alpaca_farm_100.json",
             "Meta-Llama-3-8B",
-            "ArmoRM-Llama3-8B-v0.1",
-            100,
-            20,
-            256,
-            0.5,
-        ),
-        (
-            "./datasets/alpaca_farm_100.json",
-            "Meta-Llama-3-8B",
-            "FsfairX-LLaMA3-RM-v0.1",
-            100,
-            20,
-            1024,
-            0.6,
-        ),
-        (
-            "./datasets/alpaca_farm_100.json",
-            "Meta-Llama-3-8B",
-            "RM-Mistral-7B",
-            100,
-            20,
-            128,
-            0.8,
-        ),
-        (
-            "./datasets/alpaca_farm_100.json",
-            "Mistral-7B-v0.3",
-            "ArmoRM-Llama3-8B-v0.1",
+            "perplexity",
             100,
             20,
             128,
@@ -109,61 +43,7 @@ JOBS = {
         (
             "./datasets/alpaca_farm_100.json",
             "Mistral-7B-v0.3",
-            "FsfairX-LLaMA3-RM-v0.1",
-            100,
-            20,
-            256,
-            0.6,
-        ),
-        (
-            "./datasets/alpaca_farm_100.json",
-            "Mistral-7B-v0.3",
-            "reward-model-deberta-v3-large-v2",
-            100,
-            20,
-            256,
-            0.8,
-        ),
-        (
-            "./datasets/alpaca_farm_100.json",
-            "Mistral-7B-v0.3",
-            "RM-Mistral-7B",
-            100,
-            20,
-            128,
-            0.7,
-        ),
-        (
-            "./datasets/hh_rlhf_100.json",
-            "Meta-Llama-3-8B",
-            "ArmoRM-Llama3-8B-v0.1",
-            100,
-            20,
-            256,
-            0.6,
-        ),
-        (
-            "./datasets/hh_rlhf_100.json",
-            "Meta-Llama-3-8B",
-            "FsfairX-LLaMA3-RM-v0.1",
-            100,
-            20,
-            256,
-            0.2,
-        ),
-        (
-            "./datasets/hh_rlhf_100.json",
-            "Meta-Llama-3-8B",
-            "reward-model-deberta-v3-large-v2",
-            100,
-            20,
-            256,
-            0.8,
-        ),
-        (
-            "./datasets/hh_rlhf_100.json",
-            "Meta-Llama-3-8B",
-            "RM-Mistral-7B",
+            "perplexity",
             100,
             20,
             256,
@@ -323,10 +203,10 @@ def main() -> None:
                     H100_index = 0
             else:
                 # FIXME: here, we just keep running the same job over and over
-                # H100_index = (
-                #     (H100_index + 1) % len(JOBS["H100"]) if len(JOBS["H100"]) > 0 else 0
-                # )
-                pass
+                H100_index = (
+                    (H100_index + 1) % len(JOBS["H100"]) if len(JOBS["H100"]) > 0 else 0
+                )
+                # pass
         sleep(10)
         queue_output = get_queue_output()
         A100_running_jobs = queue_output.count("A100")

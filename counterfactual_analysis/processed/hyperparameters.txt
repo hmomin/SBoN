@@ -59,6 +59,12 @@ Decision Token: 1024
 Token Rate:     0.824
 Score:          99.0
 ********************************************************************************
+AF + Meta-Llama-3-8B + perplexity
+Rejection Rate: 0.7
+Decision Token: 128
+Token Rate:     0.441
+Score:          99.2
+********************************************************************************
 AF + Meta-Llama-3-8B + RM-Mistral-7B
 Rejection Rate: 0.8
 Decision Token: 128
@@ -75,6 +81,12 @@ AF + Mistral-7B-v0.3 + FsfairX-LLaMA3-RM-v0.1
 Rejection Rate: 0.6
 Decision Token: 256
 Token Rate:     0.554
+Score:          99.2
+********************************************************************************
+AF + Mistral-7B-v0.3 + perplexity
+Rejection Rate: 0.8
+Decision Token: 256
+Token Rate:     0.462
 Score:          99.2
 ********************************************************************************
 AF + Mistral-7B-v0.3 + reward-model-deberta-v3-large-v2

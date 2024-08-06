@@ -111,7 +111,7 @@ def get_args():
         "--pretty_print_output",
         help="should output file be easily human-readable?",
         action="store_true",
-        default=False,
+        default=True,
     )
     parser.add_argument(
         "--device_id",
