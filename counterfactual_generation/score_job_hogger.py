@@ -31,11 +31,11 @@ MAX_A100_JOBS = 0
 JOBS = {
     "A100": [],
     "H100": [
-        ("output_AF_gpt2-xl__20_1000_seed_0", "perplexity"),
-        ("output_AF_gpt-j-6b__20_1000_seed_0", "perplexity"),
+        # ("output_AF_gpt2-xl__20_1000_seed_0", "perplexity"),
+        # ("output_AF_gpt-j-6b__20_1000_seed_0", "perplexity"),
         ("output_AF_Mistral-7B-v0.3__20_1000_seed_0", "perplexity"),
         ("output_AF_Meta-Llama-3-8B__20_1000_seed_0", "perplexity"),
-        ("output_HH_gpt-j-6b__20_1000_seed_0", "perplexity"),
+        # ("output_HH_gpt-j-6b__20_1000_seed_0", "perplexity"),
         ("output_HH_Meta-Llama-3-8B__20_1000_seed_0", "perplexity"),
     ],
 }
