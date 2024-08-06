@@ -1,18 +1,19 @@
 import argparse
+import gc
+import os
 import secrets
 import torch
 from accelerate import PartialState
 from accelerate.utils import gather_object
 from algorithm.best_of_n import BestOfN
-from pprint import pprint
 from algorithm.speculative_rejection import SpeculativeRejection
+from collections import namedtuple
+from pprint import pprint
 from utils.read_write_utils import (
     create_output_folder,
     get_generation_prompts,
     write_to_disk,
 )
-import gc
-import os
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
@@ -124,13 +125,26 @@ def get_args():
         type=float,
         default=1.0,
     )
+    parser.add_argument(
+        "--device_id",
+        help="which GPU to use",
+        type=int,
+        default=-1,
+    )
     args = parser.parse_args()
     return args
 
 
 def main() -> None:
-    distributed_state = PartialState()
     args = get_args()
+    PseudoState = namedtuple(
+        "PseudoState", ["device", "local_process_index", "is_main_process"]
+    )
+    distributed_state = PseudoState(
+        f"cuda{(':' + str(args.device_id)) if args.device_id > 0 else ''}", 0, True
+    )
+    state_device = str(distributed_state.device)
+    print(f"DEVICE: {state_device}")
     pprint(vars(args))
 
     generator = (
@@ -154,17 +168,14 @@ def main() -> None:
         torch.cuda.empty_cache()
         torch.cuda.synchronize()
 
-        distributed_state.wait_for_everyone()
         all_data_gather = gather_object(generator.all_data)
-        if distributed_state.is_main_process:
-            write_to_disk(
-                all_data_gather,
-                output_folder,
-                generator.initial_memory,
-                args.pretty_print_output,
-                args.record_memory,
-            )
-        distributed_state.wait_for_everyone()
+        write_to_disk(
+            all_data_gather,
+            output_folder,
+            generator.initial_memory,
+            args.pretty_print_output,
+            args.record_memory,
+        )
         generation_prompts = get_generation_prompts(args)
     print("DONE")
 
