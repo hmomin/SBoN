@@ -6,7 +6,7 @@ from time import sleep
 
 USERNAME = "my0049"
 
-# DATASET in ("hh_rlhf_100.json", "alpaca_farm_100.json")
+# DATASET in ("./datasets/hh_rlhf_100.json", "./datasets/alpaca_farm_100.json")
 # LLM in ("gpt-j-6b", "Mistral-7B-v0.3", "Meta-Llama-3-8B")
 # RM in ("RM-Mistral-7B", "FsfairX-LLaMA3-RM-v0.1", "ArmoRM-Llama3-8B-v0.1")
 

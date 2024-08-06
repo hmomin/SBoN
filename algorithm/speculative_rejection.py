@@ -1,3 +1,4 @@
+import torch
 from algorithm.generator import Generator
 from pprint import pprint
 from utils.batch_utils import calculate_batch_sizes
@@ -74,7 +75,7 @@ class SpeculativeRejection(Generator):
         )
         self.clock.stop("tokenization")
         self.clock.start()
-        partial_generation = self.generation_model.generate(
+        partial_generation: torch.LongTensor = self.generation_model.generate(
             batch_encoding.input_ids,
             pad_token_id=self.generation_tokenizer.pad_token_id,
             max_length=max_length,
