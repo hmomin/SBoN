@@ -93,7 +93,7 @@ def get_output_folder_from_tuple(job_tuple: tuple) -> str:
     return f"{data_folder}_{RM_name}"
 
 
-def get_job_command_from_tuple(job_tuple: tuple) -> str:
+def get_job_command_from_tuple(job_tuple: tuple, cluster: str = "") -> str:
     (data_folder, RM_name) = job_tuple
     job_command = (
         f"python -m counterfactual_generation.score "

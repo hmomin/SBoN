@@ -7,6 +7,10 @@ from counterfactual_generation.generate_job_hogger import (
     JOBS as generate_jobs,
     get_output_folder_from_tuple as generate_get_output_folder_from_tuple,
 )
+from counterfactual_generation.score_job_hogger import (
+    JOBS as score_jobs,
+    get_output_folder_from_tuple as score_get_output_folder_from_tuple,
+)
 from algorithm.spec_rej_job_hogger import (
     JOBS as sr_jobs,
     get_output_folder_from_tuple as sr_get_output_folder_from_tuple,
@@ -48,24 +52,20 @@ def main() -> None:
         print(schedule_output.stdout[:-1])
         print(queue_output.stdout[:-1])
         print(datetime.now().strftime("%H:%M:%S"))
-        for key, job_list in generate_jobs.items():
-            for job_tuple in job_list:
-                output_folder = generate_get_output_folder_from_tuple(job_tuple, key)
-                if not os.path.exists(output_folder):
-                    os.mkdir(output_folder)
-                num_files = len(os.listdir(output_folder))
-                if (no_empty and num_files == 0) or (no_full and num_files >= 100):
-                    continue
-                print(f"    {num_files} files in {output_folder}")
-        for key, job_list in sr_jobs.items():
-            for job_tuple in job_list:
-                output_folder = sr_get_output_folder_from_tuple(job_tuple, key)
-                if not os.path.exists(output_folder):
-                    os.mkdir(output_folder)
-                num_files = len(os.listdir(output_folder))
-                if (no_empty and num_files == 0) or (no_full and num_files >= 100):
-                    continue
-                print(f"    {num_files} files in {output_folder}")
+        for job_list, output_function in [
+            (generate_jobs, generate_get_output_folder_from_tuple),
+            (score_jobs, score_get_output_folder_from_tuple),
+            (sr_jobs, sr_get_output_folder_from_tuple),
+        ]:
+            for key, job_list in job_list.items():
+                for job_tuple in job_list:
+                    output_folder = output_function(job_tuple, key)
+                    if not os.path.exists(output_folder):
+                        os.mkdir(output_folder)
+                    num_files = len(os.listdir(output_folder))
+                    if (no_empty and num_files == 0) or (no_full and num_files >= 100):
+                        continue
+                    print(f"    {num_files} files in {output_folder}")
         time.sleep(60)
 
 
