@@ -24,7 +24,7 @@ RM in (
 )
 """
 
-MAX_H100_GPUS = 16
+MAX_H100_GPUS = 8
 MAX_A100_JOBS = 0
 # JOB FORMAT: (DATASET, LLM, RM, NUM_TRAJECTORIES, BATCH_SIZE, DECISION_TOKEN, REJECTION_RATE)
 JOBS = {
@@ -122,7 +122,7 @@ def get_gpu_count(queue_output: str) -> int:
     gpu_count = 0
     split_output = queue_output.split()
     for item in split_output:
-        if "H100GPU" in item:
+        if "SpReGPU" in item:
             gpu_count += int(item[7:])
     return gpu_count
 
@@ -212,7 +212,7 @@ def switch_job(
         if "python" in line or "accelerate" in line:
             new_lines.append(f"{job_to_run}\n")
         elif "#SBATCH --job-name=" in line:
-            new_lines.append(f"#SBATCH --job-name={cluster}GPU{num_gpus}\n")
+            new_lines.append(f"#SBATCH --job-name=SpReGPU{num_gpus}\n")
         elif "#SBATCH --gres=gpu:" in line:
             new_lines.append(f"#SBATCH --gres=gpu:{num_gpus}\n")
         else:
