@@ -1,20 +1,103 @@
 import os
-import random
 import subprocess
 from pprint import pprint
 from time import sleep
 
 USERNAME = "my0049"
 
-# DATASET in ("./datasets/hh_rlhf_100.json", "./datasets/alpaca_farm_100.json")
-# LLM in ("gpt-j-6b", "Mistral-7B-v0.3", "Meta-Llama-3-8B")
-# RM in ("RM-Mistral-7B", "FsfairX-LLaMA3-RM-v0.1", "ArmoRM-Llama3-8B-v0.1")
+"""
+DATASET in (
+    "./datasets/hh_rlhf_100.json",
+    "./datasets/alpaca_farm_100.json",
+)
+LLM in (
+    "gpt2-xl",
+    "gpt-j-6b",
+    "Mistral-7B-v0.3",
+    "Meta-Llama-3-8B",
+)
+RM in (
+    "reward-model-deberta-v3-large-v2",
+    "RM-Mistral-7B",
+    "FsfairX-LLaMA3-RM-v0.1",
+    "ArmoRM-Llama3-8B-v0.1",
+)
+"""
 
-MAX_GPUS = 16
-# JOB FORMAT: (LLM, RM, BATCH_SIZE, NUM_GPUS, SPECULATIVE_REJECTION, SEED, ALPHA)
+MAX_H100_GPUS = 16
+MAX_A100_JOBS = 0
+# JOB FORMAT: (DATASET, LLM, RM, NUM_TRAJECTORIES, BATCH_SIZE, DECISION_TOKEN, REJECTION_RATE)
 JOBS = {
     "A100": [],
-    "H100": [],
+    "H100": [
+        (
+            "./datasets/alpaca_farm_100.json",
+            "gpt-j-6b",
+            "ArmoRM-Llama3-8B-v0.1",
+            100,
+            20,
+            128,
+            0.8,
+        ),
+        (
+            "./datasets/alpaca_farm_100.json",
+            "gpt-j-6b",
+            "FsfairX-LLaMA3-RM-v0.1",
+            100,
+            20,
+            128,
+            0.7,
+        ),
+        (
+            "./datasets/alpaca_farm_100.json",
+            "gpt-j-6b",
+            "reward-model-deberta-v3-large-v2",
+            100,
+            20,
+            128,
+            0.7,
+        ),
+        (
+            "./datasets/alpaca_farm_100.json",
+            "gpt-j-6b",
+            "RM-Mistral-7B",
+            100,
+            20,
+            128,
+            0.8,
+        ),
+        # ("./datasets/alpaca_farm_100.json", "gpt2-xl", "ArmoRM-Llama3-8B-v0.1", 100, 20, 128, 0.8),
+        # ("./datasets/alpaca_farm_100.json", "gpt2-xl", "FsfairX-LLaMA3-RM-v0.1", 100, 20, 128, 0.7),
+        # ("./datasets/alpaca_farm_100.json", "gpt2-xl", "reward-model-deberta-v3-large-v2", 100, 20, 256, 0.8),
+        # ("./datasets/alpaca_farm_100.json", "gpt2-xl", "RM-Mistral-7B", 100, 20, 128, 0.8),
+        (
+            "./datasets/alpaca_farm_100.json",
+            "Meta-Llama-3-8B",
+            "ArmoRM-Llama3-8B-v0.1",
+            100,
+            20,
+            256,
+            0.5,
+        ),
+        (
+            "./datasets/alpaca_farm_100.json",
+            "Meta-Llama-3-8B",
+            "FsfairX-LLaMA3-RM-v0.1",
+            100,
+            20,
+            1024,
+            0.6,
+        ),
+        (
+            "./datasets/alpaca_farm_100.json",
+            "Meta-Llama-3-8B",
+            "RM-Mistral-7B",
+            100,
+            20,
+            128,
+            0.8,
+        ),
+    ],
 }
 
 
@@ -36,16 +119,11 @@ def get_queue_output() -> str:
 
 
 def get_gpu_count(queue_output: str) -> int:
-    global MAX_GPUS
     gpu_count = 0
-    hanshi_found = False
     split_output = queue_output.split()
     for item in split_output:
         if "H100GPU" in item:
             gpu_count += int(item[7:])
-        elif "hanshi" in item:
-            hanshi_found = True
-    MAX_GPUS = 8 if hanshi_found else 16
     return gpu_count
 
 
@@ -55,13 +133,13 @@ def create_new_job(cluster: str, idx: int) -> bool:
     output_folder = get_output_folder_from_tuple(job_to_run, cluster)
     if not os.path.exists(output_folder):
         os.mkdir(output_folder)
-    if len(os.listdir(output_folder)) >= 805:
+    if len(os.listdir(output_folder)) >= 100:
         return False
     job_command = get_job_command_from_tuple(job_to_run, output_folder)
     slurm_filename = f"{cluster}.slurm"
     try:
         slurm_contents = read_file(slurm_filename)
-        new_lines = switch_job(job_command, slurm_contents, job_to_run[3])
+        new_lines = switch_job(cluster, job_command, slurm_contents, 1)
         write_to_file(slurm_filename, new_lines)
         subprocess.run(["sbatch", slurm_filename])
         return True
@@ -72,59 +150,52 @@ def create_new_job(cluster: str, idx: int) -> bool:
 
 def get_output_folder_from_tuple(job_tuple: tuple, cluster: str) -> str:
     (
+        dataset_name,
         LLM_name,
         RM_name,
+        num_trajectories,
         batch_size,
-        num_gpus,
-        speculative_rejection,
-        seed,
-        alpha,
+        decision_token,
+        rejection_rate,
     ) = job_tuple
-    type_code = f"SpR_alpha_{alpha}" if speculative_rejection else "BoN"
-    return f"output_{cluster}_{type_code}_AF_{LLM_name}_{RM_name}_{batch_size}_{num_gpus}_seed_{seed}"
+    dataset_code = "AF" if "alpaca" in dataset_name else "HH"
+    return f"output_{cluster}_SR_{dataset_code}_{LLM_name}_{RM_name}_{decision_token}_{rejection_rate}"
 
 
 def get_job_command_from_tuple(job_tuple: tuple, output_folder: str) -> str:
     (
+        dataset_name,
         LLM_name,
         RM_name,
+        num_trajectories,
         batch_size,
-        num_gpus,
-        speculative_rejection,
-        seed,
-        alpha,
+        decision_token,
+        rejection_rate,
     ) = job_tuple
-    max_tokens = 2_048 if "sft10k" in LLM_name else 8_000
-    top_p = 1.0
-    gpu_ids = get_gpu_ids(num_gpus)
-    port = 42_000 + random.randint(0, 1_000)
-    multiple_status = f"--multi_gpu --main_process_port {port} " if num_gpus > 1 else ""
+    if "gpt2-xl" in LLM_name:
+        max_length = 1_024
+    elif "gpt-j-6b" in LLM_name:
+        max_length = 2_048
+    else:
+        max_length = 8_000
     job_command = (
-        f"accelerate launch "
-        + multiple_status
-        + f"--num_processes {num_gpus} --num_machines 1 "
-        + f"--gpu_ids {gpu_ids} --machine_rank 0 --mixed_precision no --dynamo_backend no "
-        + f"main.py "
+        f"python -m algorithm.main "
+        + f"--data_filename {dataset_name} "
         + f"--output_folder {output_folder} "
         + f"--llm_name {LLM_name} "
         + f"--reward_model_name {RM_name} "
-        + f"--max_tokens {max_tokens} "
-        + f"--max_gen_tokens {max_tokens} "
-        + f"--data_filename ./datasets/alpaca_farm_eval.json "  # FIXME: can switch between 100 and eval here
+        + f"--num_trajectories {num_trajectories} "
+        + f"--speculative_rejection "
+        + f"--decision_token {decision_token} "
+        + f"--rejection_rate {rejection_rate} "
+        + f"--max_tokens {max_length} "
         + f"--batch_size {batch_size} "
-        + f"--seed {seed} "
+        + f"--seed {0} "
         + f"--top_k {50} "
-        + f"--top_p {top_p} "
+        + f"--top_p {1.0} "
         + f"--temperature {1.0} "
-        # + f"--record_memory "
     )
-    if speculative_rejection:
-        job_command += f"--speculative_rejection --alpha {alpha}"
     return job_command
-
-
-def get_gpu_ids(num_gpus: int) -> str:
-    return ",".join([str(i) for i in range(num_gpus)])
 
 
 def read_file(filename: str) -> list[str]:
@@ -133,13 +204,15 @@ def read_file(filename: str) -> list[str]:
     return contents
 
 
-def switch_job(job_to_run: str, slurm_contents: list[str], num_gpus: int) -> list[str]:
+def switch_job(
+    cluster: str, job_to_run: str, slurm_contents: list[str], num_gpus: int
+) -> list[str]:
     new_lines: list[str] = []
     for line in slurm_contents:
         if "python" in line or "accelerate" in line:
             new_lines.append(f"{job_to_run}\n")
         elif "#SBATCH --job-name=" in line:
-            new_lines.append(f"#SBATCH --job-name=H100GPU{num_gpus}\n")
+            new_lines.append(f"#SBATCH --job-name={cluster}GPU{num_gpus}\n")
         elif "#SBATCH --gres=gpu:" in line:
             new_lines.append(f"#SBATCH --gres=gpu:{num_gpus}\n")
         else:
@@ -157,21 +230,31 @@ def main() -> None:
     queue_output = get_queue_output()
     A100_running_jobs = queue_output.count("A100")
     gpu_count = get_gpu_count(queue_output)
-    H100_index = 0
+    A100_index = H100_index = 0
 
     while len(JOBS["A100"]) + len(JOBS["H100"]) > 0:
-        if len(JOBS["A100"]) > 0 and A100_running_jobs < 2:
-            job_created = create_new_job("A100", 0)
+        if len(JOBS["A100"]) > 0 and A100_running_jobs < MAX_A100_JOBS:
+            job_created = create_new_job("A100", A100_index)
             if not job_created:
-                JOBS["A100"].pop(0)
-        if len(JOBS["H100"]) > 0 and gpu_count < MAX_GPUS:
+                JOBS["A100"].pop(A100_index)
+                if A100_index >= len(JOBS["A100"]):
+                    A100_index = 0
+            else:
+                A100_index = (
+                    (A100_index + 1) % len(JOBS["A100"]) if len(JOBS["A100"]) > 0 else 0
+                )
+        if len(JOBS["H100"]) > 0 and gpu_count < MAX_H100_GPUS:
             job_created = create_new_job("H100", H100_index)
             if not job_created:
                 JOBS["H100"].pop(H100_index)
+                if H100_index >= len(JOBS["H100"]):
+                    H100_index = 0
             else:
-                H100_index = (
-                    (H100_index + 1) % len(JOBS["H100"]) if len(JOBS["H100"]) > 0 else 0
-                )
+                # FIXME: here, we just keep running the same job over and over
+                # H100_index = (
+                #     (H100_index + 1) % len(JOBS["H100"]) if len(JOBS["H100"]) > 0 else 0
+                # )
+                pass
         sleep(10)
         queue_output = get_queue_output()
         A100_running_jobs = queue_output.count("A100")

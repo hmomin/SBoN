@@ -1,4 +1,5 @@
 import argparse
+import secrets
 import torch
 from accelerate import PartialState
 from accelerate.utils import gather_object
@@ -141,10 +142,9 @@ def main() -> None:
     generation_prompts = get_generation_prompts(args)
     output_folder = create_output_folder(args)
 
-    latency_list = []
     while len(generation_prompts) > 0:
         print(f"Number of prompts remaining: {len(generation_prompts)}", flush=True)
-        prompt_dict = generation_prompts[0]
+        prompt_dict = secrets.choice(generation_prompts)
         pprint(prompt_dict)
         prompt: str = prompt_dict["prompt"]
 
@@ -156,9 +156,6 @@ def main() -> None:
 
         distributed_state.wait_for_everyone()
         all_data_gather = gather_object(generator.all_data)
-        latency_list.append(all_data_gather[0]["elapsed_sec"])
-        # print(f"Latency: {latency_list}")
-        # pprint(generator.clock.get_chunks())
         if distributed_state.is_main_process:
             write_to_disk(
                 all_data_gather,

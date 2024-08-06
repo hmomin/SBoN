@@ -91,7 +91,12 @@ def get_job_command_from_tuple(job_tuple: tuple, output_folder: str) -> str:
         num_trajectories,
         seed,
     ) = job_tuple
-    max_length = 2_048 if any(s in LLM_name for s in ["sft10k", "gpt-j-6b"]) else 8_000
+    if "gpt2-xl" in LLM_name:
+        max_length = 1_024
+    elif "gpt-j-6b" in LLM_name:
+        max_length = 2_048
+    else:
+        max_length = 8_000
     job_command = (
         f"python -m counterfactual_generation.generate "
         + f"--data_filename {data_filename} "

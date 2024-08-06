@@ -29,12 +29,13 @@ def load_data(filepath: str) -> list[tuple[float, int, float, float]]:
     return data
 
 
-def get_model_names_from_filename(filepath: str) -> tuple[str, str]:
+def get_names_from_filename(filepath: str) -> tuple[str, str, str]:
     basename = os.path.basename(filepath)
     split_basename = basename.split("_")
+    dataset_name = split_basename[1]
     lm_name = split_basename[2]
     rm_name = split_basename[8]
-    return lm_name, rm_name
+    return dataset_name, lm_name, rm_name
 
 
 def main() -> None:
@@ -46,7 +47,7 @@ def main() -> None:
         best_rejection_rate = -1.0
         best_decision_token = -1
         associated_score = -1.0
-        lm_name, rm_name = get_model_names_from_filename(filepath)
+        dataset_name, lm_name, rm_name = get_names_from_filename(filepath)
         data = load_data(filepath)
         for rejection_rate, decision_token, token_rate, score in data:
             if score >= args.score_threshold and token_rate < lowest_token_rate:
@@ -54,7 +55,7 @@ def main() -> None:
                 best_rejection_rate = rejection_rate
                 best_decision_token = decision_token
                 associated_score = score
-        hyperparameter_print.append(f"{lm_name} + {rm_name}")
+        hyperparameter_print.append(f"{dataset_name} + {lm_name} + {rm_name}")
         hyperparameter_print.append(f"Rejection Rate: {best_rejection_rate}")
         hyperparameter_print.append(f"Decision Token: {best_decision_token}")
         hyperparameter_print.append(f"Token Rate:     {lowest_token_rate:.3f}")
