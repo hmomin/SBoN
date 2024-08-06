@@ -149,14 +149,14 @@ def get_reward_tokens(
     device: torch.device,
 ) -> torch.Tensor | list[str]:
     if "perplexity" in reward_model_name:
-        reward_tokens = reward_tokenizer.batch_encode_plus(
-            [
-                reward_tokenizer.bos_token + question + output_text
-                for output_text in output_texts
-            ],
-            return_tensors="pt",
-            padding=True,
-        ).to(device)
+        reward_tokens = [
+            reward_tokenizer(
+                reward_tokenizer.bos_token + question + output_text,
+                return_tensors="pt",
+                padding=True,
+            ).to(device)
+            for output_text in output_texts
+        ]
         return reward_tokens
     elif is_mistral_type(reward_model_name):
         conversation_objects: list[list[dict[str, str]]] = get_conversation_objects(
@@ -253,10 +253,10 @@ def get_rewards(
     reward_tokens: torch.Tensor | list[str],
 ) -> list[float] | None:
     if "perplexity" in reward_model_name:
-        reward_list = calculate_batch_perplexity(reward_model, reward_tokens)
-        print(reward_list)
-        raise Exception("Perplexity not implemented yet...")
-    if is_mistral_type(reward_model_name):
+        perplexities = calculate_batch_perplexity(reward_model, reward_tokens)
+        # NOTE: we want to minimize perplexity, so reward is the negative of perplexity
+        reward_list = [-1 * perplexity for perplexity in perplexities]
+    elif is_mistral_type(reward_model_name):
         # NOTE: batch_size should be very large to ensure batching with pipelines
         pipe_kwargs = {
             "top_k": None,
@@ -324,19 +324,18 @@ def get_rewards(
 
 
 def calculate_batch_perplexity(
-    generation_model, input_encoding: transformers.BatchEncoding
+    generation_model, batch_encodings: list[transformers.BatchEncoding]
 ) -> list[float]:
-    outputs = generation_model(
-        **input_encoding,
-        labels=input_encoding.input_ids,
-    )
-    print("uh")
-    print(outputs)
-    loss = outputs.loss
-    print(loss)
-    perplexity = torch.exp(loss)
-    print(perplexity)
-    raise
+    perplexities: list[float] = []
+    for input_encoding in batch_encodings:
+        outputs = generation_model(
+            **input_encoding,
+            labels=input_encoding.input_ids,
+        )
+        loss = outputs.loss
+        perplexity = torch.exp(loss)
+        perplexities.append(perplexity.item())
+    return perplexities
 
 
 def rebatch_tokens_for_farm(
