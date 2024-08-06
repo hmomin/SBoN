@@ -21,11 +21,11 @@ def get_batches(num_trajectories: int, batch_size: int) -> list[int]:
 
 
 def main() -> None:
-    N = 100
-    B = 19
-    batch_sizes = calculate_batch_sizes(N, B)
-    assert sum(batch_sizes) == N
-    assert batch_sizes == [17, 17, 17, 17, 16, 16]
+    assert calculate_batch_sizes(100, 20) == [20, 20, 20, 20, 20]
+    assert calculate_batch_sizes(100, 19) == [17, 17, 17, 17, 16, 16]
+    assert calculate_batch_sizes(17, 20) == [17]
+    assert calculate_batch_sizes(20, 20) == [20]
+    assert calculate_batch_sizes(21, 20) == [11, 10]
 
 
 if __name__ == "__main__":

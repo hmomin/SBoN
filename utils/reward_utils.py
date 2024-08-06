@@ -148,7 +148,17 @@ def get_reward_tokens(
     reward_tokenizer,
     device: torch.device,
 ) -> torch.Tensor | list[str]:
-    if is_mistral_type(reward_model_name):
+    if "perplexity" in reward_model_name:
+        reward_tokens = reward_tokenizer.batch_encode_plus(
+            [
+                reward_tokenizer.bos_token + question + output_text
+                for output_text in output_texts
+            ],
+            return_tensors="pt",
+            padding=True,
+        ).to(device)
+        return reward_tokens
+    elif is_mistral_type(reward_model_name):
         conversation_objects: list[list[dict[str, str]]] = get_conversation_objects(
             question, output_texts
         )
@@ -242,6 +252,10 @@ def get_rewards(
     reward_model,
     reward_tokens: torch.Tensor | list[str],
 ) -> list[float] | None:
+    if "perplexity" in reward_model_name:
+        reward_list = calculate_batch_perplexity(reward_model, reward_tokens)
+        print(reward_list)
+        raise Exception("Perplexity not implemented yet...")
     if is_mistral_type(reward_model_name):
         # NOTE: batch_size should be very large to ensure batching with pipelines
         pipe_kwargs = {
@@ -307,6 +321,22 @@ def get_rewards(
     if type(reward_list) == float:
         reward_list = [reward_list]
     return reward_list
+
+
+def calculate_batch_perplexity(
+    generation_model, input_encoding: transformers.BatchEncoding
+) -> list[float]:
+    outputs = generation_model(
+        **input_encoding,
+        labels=input_encoding.input_ids,
+    )
+    print("uh")
+    print(outputs)
+    loss = outputs.loss
+    print(loss)
+    perplexity = torch.exp(loss)
+    print(perplexity)
+    raise
 
 
 def rebatch_tokens_for_farm(

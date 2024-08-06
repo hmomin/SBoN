@@ -55,8 +55,17 @@ class SpeculativeRejection(Generator):
         self.clock.start()
         if len(current_generations) > 0:
             current_trajectories = []
-            batch_sizes = calculate_batch_sizes(len(current_generations), batch_size)
+            batch_sizes = calculate_batch_sizes(
+                len(current_generations), self.args.batch_size
+            )
+            idx = 0
+            batch_current_generations: list[list[str]] = []
             for batch_size in batch_sizes:
+                batch_current_generations.append(
+                    current_generations[idx : idx + batch_size]
+                )
+                idx += batch_size
+            for current_generations in batch_current_generations:
                 batch_trajectories = self.generate_batch_trajectories(
                     prompt, current_generations, self.args.max_tokens
                 )

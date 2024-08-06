@@ -17,6 +17,7 @@ from pprint import pprint
 from time import sleep
 from tqdm import tqdm
 from typing import Any
+from utils.generation_utils import get_generation_model
 from utils.reward_utils import (
     compute_scores,
     get_reward_model,
@@ -230,10 +231,17 @@ def main() -> None:
     generation_tokenizer.pad_token = generation_tokenizer.eos_token
     generation_tokenizer.padding_side = "right"
 
-    reward_tokenizer = get_reward_tokenizer(reward_model_name)
-    reward_model = get_reward_model(
-        reward_model_name, reward_tokenizer, distributed_state.device
-    )
+    if args.reward_model_name == "perplexity":
+        reward_tokenizer = generation_tokenizer
+        reward_model = get_generation_model(
+            LLM_name,
+            distributed_state.device,
+        )
+    else:
+        reward_tokenizer = get_reward_tokenizer(reward_model_name)
+        reward_model = get_reward_model(
+            reward_model_name, reward_tokenizer, distributed_state.device
+        )
 
     while len(generation_filepaths) > 0:
         generation_filepath = secrets.choice(generation_filepaths)

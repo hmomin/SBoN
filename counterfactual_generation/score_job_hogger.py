@@ -62,7 +62,7 @@ def get_gpu_count(queue_output: str) -> int:
     gpu_count = 0
     split_output = queue_output.split()
     for item in split_output:
-        if "H100GPU" in item:
+        if "PerpGPU" in item:
             gpu_count += int(item[7:])
     return gpu_count
 
@@ -117,7 +117,7 @@ def switch_job(
         if "python" in line or "accelerate" in line:
             new_lines.append(f"{job_to_run}\n")
         elif "#SBATCH --job-name=" in line:
-            new_lines.append(f"#SBATCH --job-name={cluster}GPU{num_gpus}\n")
+            new_lines.append(f"#SBATCH --job-name=PerpGPU{num_gpus}\n")
         elif "#SBATCH --gres=gpu:" in line:
             new_lines.append(f"#SBATCH --gres=gpu:{num_gpus}\n")
         else:
