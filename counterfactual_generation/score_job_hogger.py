@@ -21,6 +21,7 @@ RM in (
     "RM-Mistral-7B",
     "FsfairX-LLaMA3-RM-v0.1",
     "ArmoRM-Llama3-8B-v0.1",
+    "perplexity",
 )
 """
 
@@ -30,28 +31,12 @@ MAX_A100_JOBS = 0
 JOBS = {
     "A100": [],
     "H100": [
-        # ("output_AF_gpt2-xl__20_1000_seed_0", "reward-model-deberta-v3-large-v2"),
-        # ("output_AF_gpt2-xl__20_1000_seed_0", "RM-Mistral-7B"),
-        # ("output_AF_gpt2-xl__20_1000_seed_0", "FsfairX-LLaMA3-RM-v0.1"),
-        # ("output_AF_gpt2-xl__20_1000_seed_0", "ArmoRM-Llama3-8B-v0.1"),
-        ("output_AF_gpt-j-6b__20_1000_seed_0", "reward-model-deberta-v3-large-v2"),
-        ("output_AF_gpt-j-6b__20_1000_seed_0", "RM-Mistral-7B"),
-        ("output_AF_gpt-j-6b__20_1000_seed_0", "FsfairX-LLaMA3-RM-v0.1"),
-        ("output_AF_gpt-j-6b__20_1000_seed_0", "ArmoRM-Llama3-8B-v0.1"),
-        (
-            "output_AF_Mistral-7B-v0.3__20_1000_seed_0",
-            "reward-model-deberta-v3-large-v2",
-        ),
-        ("output_AF_Mistral-7B-v0.3__20_1000_seed_0", "RM-Mistral-7B"),
-        ("output_AF_Mistral-7B-v0.3__20_1000_seed_0", "FsfairX-LLaMA3-RM-v0.1"),
-        ("output_AF_Mistral-7B-v0.3__20_1000_seed_0", "ArmoRM-Llama3-8B-v0.1"),
-        (
-            "output_AF_Meta-Llama-3-8B__20_1000_seed_0",
-            "reward-model-deberta-v3-large-v2",
-        ),
-        ("output_AF_Meta-Llama-3-8B__20_1000_seed_0", "RM-Mistral-7B"),
-        ("output_AF_Meta-Llama-3-8B__20_1000_seed_0", "FsfairX-LLaMA3-RM-v0.1"),
-        ("output_AF_Meta-Llama-3-8B__20_1000_seed_0", "ArmoRM-Llama3-8B-v0.1"),
+        ("output_AF_gpt2-xl__20_1000_seed_0", "perplexity"),
+        ("output_AF_gpt-j-6b__20_1000_seed_0", "perplexity"),
+        ("output_AF_Mistral-7B-v0.3__20_1000_seed_0", "perplexity"),
+        ("output_AF_Meta-Llama-3-8B__20_1000_seed_0", "perplexity"),
+        ("output_HH_gpt-j-6b__20_1000_seed_0", "perplexity"),
+        ("output_HH_Meta-Llama-3-8B__20_1000_seed_0", "perplexity"),
     ],
 }
 

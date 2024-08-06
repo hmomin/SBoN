@@ -29,20 +29,20 @@ device_ids=(
 
 index=0
 
-for data_folder in "${data_folders[@]}"
-do
-    for RM_name in "${RM_names[@]}"
-    do
-        device_id=${device_ids[$index]}
+# for data_folder in "${data_folders[@]}"
+# do
+#     for RM_name in "${RM_names[@]}"
+#     do
+#         device_id=${device_ids[$index]}
         
-        python -m counterfactual_generation.score \
-        --data_folder $data_folder \
-        --reward_model_name $RM_name \
-        --device_id $device_id &
+#         python -m counterfactual_generation.score \
+#         --data_folder $data_folder \
+#         --reward_model_name $RM_name \
+#         --device_id $device_id &
         
-        index=$((index + 1))
-    done
-done
+#         index=$((index + 1))
+#     done
+# done
 
 # ("./datasets/alpaca_farm_100.json", "gpt2-xl", "ArmoRM-Llama3-8B-v0.1", 100, 20, 128, 0.8),
 # ("./datasets/alpaca_farm_100.json", "gpt2-xl", "FsfairX-LLaMA3-RM-v0.1", 100, 20, 128, 0.7),
@@ -54,7 +54,7 @@ python -m algorithm.main \
 --output_folder output_A100_SR_AF_gpt2-xl_ArmoRM-Llama3-8B-v0.1_128_0.8 \
 --llm_name gpt2-xl \
 --reward_model_name ArmoRM-Llama3-8B-v0.1 \
---num_trajectories 1000 \
+--num_trajectories 100 \
 --speculative_rejection \
 --decision_token 128 \
 --rejection_rate 0.8 \
@@ -71,7 +71,7 @@ python -m algorithm.main \
 --output_folder output_A100_SR_AF_gpt2-xl_FsfairX-LLaMA3-RM-v0.1_128_0.7 \
 --llm_name gpt2-xl \
 --reward_model_name FsfairX-LLaMA3-RM-v0.1 \
---num_trajectories 1000 \
+--num_trajectories 100 \
 --speculative_rejection \
 --decision_token 128 \
 --rejection_rate 0.7 \
@@ -88,7 +88,7 @@ python -m algorithm.main \
 --output_folder output_A100_SR_AF_gpt2-xl_reward-model-deberta-v3-large-v2_256_0.8 \
 --llm_name gpt2-xl \
 --reward_model_name reward-model-deberta-v3-large-v2 \
---num_trajectories 1000 \
+--num_trajectories 100 \
 --speculative_rejection \
 --decision_token 256 \
 --rejection_rate 0.8 \
@@ -105,7 +105,7 @@ python -m algorithm.main \
 --output_folder output_A100_SR_AF_gpt2-xl_RM-Mistral-7B_128_0.8 \
 --llm_name gpt2-xl \
 --reward_model_name RM-Mistral-7B \
---num_trajectories 1000 \
+--num_trajectories 100 \
 --speculative_rejection \
 --decision_token 128 \
 --rejection_rate 0.8 \
