@@ -127,7 +127,6 @@ def get_memory_constrained_generation(
     pad_token_id: int | None,
     args,
 ) -> torch.LongTensor:
-
     past_key_values = None
     batch_size = generation_ids.shape[0]
     finished_generations = torch.zeros(batch_size).bool().to(generation_model.device)

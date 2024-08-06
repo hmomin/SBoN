@@ -84,7 +84,7 @@ def load_data(filepath: str) -> list[dict[str, Any]]:
 
 def get_decision_tokens(max_length: int) -> list[int]:
     log_final_token = int(np.log2(max_length))
-    decision_tokens = [2 ** i for i in range(log_final_token + 1)]
+    decision_tokens = [2**i for i in range(log_final_token + 1)]
     if decision_tokens[-1] == max_length:
         decision_tokens.pop()
     return decision_tokens

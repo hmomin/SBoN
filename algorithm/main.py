@@ -34,7 +34,7 @@ def get_args():
         "--model_dir",
         help="directory containing model files - leave as '' to instantiate from huggingface",
         type=str,
-        default="./../../../../scratch/gpfs/my0049",
+        default="./../../../scratch/gpfs/my0049",
     )
     parser.add_argument(
         "--llm_name", help="model basename for generation", type=str, required=True
@@ -46,16 +46,28 @@ def get_args():
         required=True,
     )
     parser.add_argument(
+        "--num_trajectories",
+        help="how many trajectories to generate/score per prompt",
+        type=int,
+        default=1_000,
+    )
+    parser.add_argument(
         "--speculative_rejection",
         help="use speculative rejection for generation?",
         action="store_true",
         default=False,
     )
     parser.add_argument(
-        "--alpha",
-        help="fraction of trajectories (finished or generating) to reject on each speculative rejection pass",
+        "--decision_token",
+        help="what 'score before' token index to use for speculative rejection",
+        type=int,
+        default=-1,
+    )
+    parser.add_argument(
+        "--rejection_rate",
+        help="what percentage of trajectories to reject after scoring them at decision token",
         type=float,
-        default=-1.0,
+        default=0.0,
     )
     parser.add_argument(
         "--max_tokens",
@@ -100,28 +112,10 @@ def get_args():
         default=False,
     )
     parser.add_argument(
-        "--efficient",
-        help="whether to use efficient engine to boost Speculative Rejection",
-        action="store_true",
-        default=False,
-    )
-    parser.add_argument(
-        "--spec_dec",
-        help="whether to use efficient engine w/ spec dec to boost Speculative Rejection",
-        action="store_true",
-        default=False,
-    )
-    parser.add_argument(
         "--local_files_only",
         help="whether to use local_files_only for HF models",
         action="store_true",
         default=False,
-    )
-    parser.add_argument(
-        "--max_gen_tokens",
-        help="maximum number of tokens to generate per trajectory (w/o prompt)",
-        type=int,
-        default=2_048,
     )
     parser.add_argument(
         "--temperature",
