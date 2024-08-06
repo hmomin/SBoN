@@ -89,3 +89,27 @@ Decision Token: 128
 Token Rate:     0.402
 Score:          99.1
 ********************************************************************************
+HH + Meta-Llama-3-8B + ArmoRM-Llama3-8B-v0.1
+Rejection Rate: 0.6
+Decision Token: 256
+Token Rate:     0.488
+Score:          99.1
+********************************************************************************
+HH + Meta-Llama-3-8B + FsfairX-LLaMA3-RM-v0.1
+Rejection Rate: 0.2
+Decision Token: 256
+Token Rate:     0.851
+Score:          99.1
+********************************************************************************
+HH + Meta-Llama-3-8B + reward-model-deberta-v3-large-v2
+Rejection Rate: 0.8
+Decision Token: 256
+Token Rate:     0.381
+Score:          99.2
+********************************************************************************
+HH + Meta-Llama-3-8B + RM-Mistral-7B
+Rejection Rate: 0.8
+Decision Token: 256
+Token Rate:     0.367
+Score:          99.5
+********************************************************************************
