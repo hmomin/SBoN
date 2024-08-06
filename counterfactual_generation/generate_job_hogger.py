@@ -15,9 +15,9 @@ MAX_A100_JOBS = 0
 JOBS = {
     "A100": [],
     "H100": [
-        ("./datasets/hh_rlhf_100.json", "Meta-Llama-3-8B", "", 20, 1_000, 0),
-        ("./datasets/hh_rlhf_100.json", "gpt-j-6b", "", 20, 1_000, 0),
-        ("./datasets/hh_rlhf_100.json", "Mistral-7B-v0.3", "", 20, 1_000, 0),
+        # ("./datasets/hh_rlhf_100.json", "Meta-Llama-3-8B", "", 20, 1_000, 0),
+        # ("./datasets/hh_rlhf_100.json", "gpt-j-6b", "", 20, 1_000, 0),
+        # ("./datasets/hh_rlhf_100.json", "Mistral-7B-v0.3", "", 20, 1_000, 0),
     ],
 }
 
