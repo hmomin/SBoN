@@ -137,6 +137,12 @@ Decision Token: 256
 Token Rate:     0.851
 Score:          99.1
 ********************************************************************************
+HH + Meta-Llama-3-8B + perplexity
+Rejection Rate: 0.8
+Decision Token: 256
+Token Rate:     0.425
+Score:          99.1
+********************************************************************************
 HH + Meta-Llama-3-8B + reward-model-deberta-v3-large-v2
 Rejection Rate: 0.8
 Decision Token: 256

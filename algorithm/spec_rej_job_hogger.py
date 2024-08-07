@@ -49,6 +49,15 @@ JOBS = {
             128,
             0.6,
         ),
+        (
+            "./datasets/hh_rlhf_100.json",
+            "Meta-Llama-3-8B",
+            "perplexity",
+            100,
+            20,
+            256,
+            0.8,
+        ),
     ],
 }
 
