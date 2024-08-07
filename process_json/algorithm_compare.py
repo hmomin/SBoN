@@ -3,6 +3,7 @@
 import json
 import numpy as np
 import os
+import random
 from glob import glob
 from matplotlib import pyplot as plt
 from pprint import pprint
@@ -19,29 +20,53 @@ GENERATION_FOLDER_PATHS = [
     "./output_AF_gpt-j-6b__20_1000_seed_0",
     "./output_AF_gpt-j-6b__20_1000_seed_0",
     "./output_AF_gpt-j-6b__20_1000_seed_0",
+    "./output_AF_Mistral-7B-v0.3__20_1000_seed_0",
+    "./output_AF_Mistral-7B-v0.3__20_1000_seed_0",
+    "./output_AF_Mistral-7B-v0.3__20_1000_seed_0",
     "./output_AF_Meta-Llama-3-8B__20_1000_seed_0",
     "./output_AF_Meta-Llama-3-8B__20_1000_seed_0",
     "./output_AF_Meta-Llama-3-8B__20_1000_seed_0",
+    # "./output_HH_Meta-Llama-3-8B__20_1000_seed_0",
+    # "./output_HH_Meta-Llama-3-8B__20_1000_seed_0",
+    # "./output_HH_Meta-Llama-3-8B__20_1000_seed_0",
 ]
 SCORE_FOLDER_PATHS = [
-    "./output_AF_gpt2-xl__20_1000_seed_0_ArmoRM-Llama3-8B-v0.1",
-    "./output_AF_gpt2-xl__20_1000_seed_0_FsfairX-LLaMA3-RM-v0.1",
     "./output_AF_gpt2-xl__20_1000_seed_0_reward-model-deberta-v3-large-v2",
     "./output_AF_gpt2-xl__20_1000_seed_0_RM-Mistral-7B",
-    "./output_AF_gpt-j-6b__20_1000_seed_0_ArmoRM-Llama3-8B-v0.1",
-    "./output_AF_gpt-j-6b__20_1000_seed_0_FsfairX-LLaMA3-RM-v0.1",
+    "./output_AF_gpt2-xl__20_1000_seed_0_FsfairX-LLaMA3-RM-v0.1",
+    "./output_AF_gpt2-xl__20_1000_seed_0_ArmoRM-Llama3-8B-v0.1",
     "./output_AF_gpt-j-6b__20_1000_seed_0_reward-model-deberta-v3-large-v2",
     "./output_AF_gpt-j-6b__20_1000_seed_0_RM-Mistral-7B",
+    "./output_AF_gpt-j-6b__20_1000_seed_0_FsfairX-LLaMA3-RM-v0.1",
+    "./output_AF_gpt-j-6b__20_1000_seed_0_ArmoRM-Llama3-8B-v0.1",
+    "./output_AF_Mistral-7B-v0.3__20_1000_seed_0_RM-Mistral-7B",
+    "./output_AF_Mistral-7B-v0.3__20_1000_seed_0_FsfairX-LLaMA3-RM-v0.1",
+    "./output_AF_Mistral-7B-v0.3__20_1000_seed_0_ArmoRM-Llama3-8B-v0.1",
+    "./output_AF_Meta-Llama-3-8B__20_1000_seed_0_RM-Mistral-7B",
+    "./output_AF_Meta-Llama-3-8B__20_1000_seed_0_FsfairX-LLaMA3-RM-v0.1",
+    "./output_AF_Meta-Llama-3-8B__20_1000_seed_0_ArmoRM-Llama3-8B-v0.1",
+    # "./output_HH_Meta-Llama-3-8B__20_1000_seed_0_RM-Mistral-7B",
+    # "./output_HH_Meta-Llama-3-8B__20_1000_seed_0_FsfairX-LLaMA3-RM-v0.1",
+    # "./output_HH_Meta-Llama-3-8B__20_1000_seed_0_ArmoRM-Llama3-8B-v0.1",
 ]
 SBON_FOLDER_PATHS = [
-    "./output_A100_SR_AF_gpt2-xl_ArmoRM-Llama3-8B-v0.1_128_0.8",
-    "./output_A100_SR_AF_gpt2-xl_FsfairX-LLaMA3-RM-v0.1_128_0.7",
     "./output_A100_SR_AF_gpt2-xl_reward-model-deberta-v3-large-v2_256_0.8",
     "./output_A100_SR_AF_gpt2-xl_RM-Mistral-7B_128_0.8",
-    "./output_H100_SR_AF_gpt-j-6b_ArmoRM-Llama3-8B-v0.1_128_0.8",
-    "./output_H100_SR_AF_gpt-j-6b_FsfairX-LLaMA3-RM-v0.1_128_0.7",
+    "./output_A100_SR_AF_gpt2-xl_FsfairX-LLaMA3-RM-v0.1_128_0.7",
+    "./output_A100_SR_AF_gpt2-xl_ArmoRM-Llama3-8B-v0.1_128_0.8",
     "./output_H100_SR_AF_gpt-j-6b_reward-model-deberta-v3-large-v2_128_0.7",
     "./output_H100_SR_AF_gpt-j-6b_RM-Mistral-7B_128_0.8",
+    "./output_H100_SR_AF_gpt-j-6b_FsfairX-LLaMA3-RM-v0.1_128_0.7",
+    "./output_H100_SR_AF_gpt-j-6b_ArmoRM-Llama3-8B-v0.1_128_0.8",
+    "./output_H100_SR_AF_Mistral-7B-v0.3_RM-Mistral-7B_128_0.7",
+    "./output_H100_SR_AF_Mistral-7B-v0.3_FsfairX-LLaMA3-RM-v0.1_256_0.6",
+    "./output_H100_SR_AF_Mistral-7B-v0.3_ArmoRM-Llama3-8B-v0.1_128_0.7",
+    "./output_H100_SR_AF_Meta-Llama-3-8B_RM-Mistral-7B_128_0.8",
+    "./output_H100_SR_AF_Meta-Llama-3-8B_FsfairX-LLaMA3-RM-v0.1_1024_0.6",
+    "./output_H100_SR_AF_Meta-Llama-3-8B_ArmoRM-Llama3-8B-v0.1_256_0.5",
+    # "./output_H100_SR_HH_Meta-Llama-3-8B_RM-Mistral-7B_256_0.8",
+    # "./output_H100_SR_HH_Meta-Llama-3-8B_FsfairX-LLaMA3-RM-v0.1_256_0.2",
+    # "./output_H100_SR_HH_Meta-Llama-3-8B_ArmoRM-Llama3-8B-v0.1_256_0.6",
 ]
 
 
@@ -94,6 +119,13 @@ def compute_suboptimality_score(
 
 
 def main() -> None:
+    random.seed(1)
+    score_offset = 1.7
+    M = 40
+    tracker = []
+
+    num_effective_batches = int(M / 20)
+    assert num_effective_batches * 20 == M
     assert (
         len(GENERATION_FOLDER_PATHS)
         == len(SCORE_FOLDER_PATHS)
@@ -112,7 +144,9 @@ def main() -> None:
         ), f"{len(generation_filepaths)} != {len(score_filepaths)} != {len(spec_rej_filepaths)}"
 
         suboptimality_scores: list[float] = []
+        bom_suboptimality_scores: list[float] = []
         total_bon_time = 0.0
+        total_bom_time = 0.0
         total_spec_rej_time = 0.0
 
         for generation_filepath, score_filepath, spec_rej_filepath in zip(
@@ -130,13 +164,18 @@ def main() -> None:
             score_data = get_data_from_filepath(score_filepath)
             spec_rej_data = get_data_from_filepath(spec_rej_filepath)
             bo1000_data = get_full_bon_data(generation_data, score_data)
-            bon_data = bo1000_data[:5]
+            bon_data = random.choices(bo1000_data, k=5)
+            bom_data = random.choices(bo1000_data, k=num_effective_batches)
             bon_time = sum([d["elapsed_sec"] for d in bon_data])
+            bom_time = sum([d["elapsed_sec"] for d in bom_data])
             spec_rej_time = sum([d["elapsed_sec"] for d in spec_rej_data])
             total_bon_time += bon_time
+            total_bom_time += bom_time
             total_spec_rej_time += spec_rej_time
             suboptimality_score = compute_suboptimality_score(bon_data, spec_rej_data)
+            bom_suboptimality_score = compute_suboptimality_score(bon_data, bom_data)
             suboptimality_scores.append(suboptimality_score)
+            bom_suboptimality_scores.append(bom_suboptimality_score)
             # print("****************************************************")
         # plot histogram of suboptimality scores
         # plt.hist(suboptimality_scores, bins=100)
@@ -145,14 +184,27 @@ def main() -> None:
         # plt.ylabel("Frequency")
         # plt.show()
         mean_suboptimality_score = np.mean(suboptimality_scores)
+        mean_bom_suboptimality_score = np.mean(bom_suboptimality_scores)
         # median_suboptimality_score = np.median(suboptimality_scores)
         mean_speedup = total_bon_time / total_spec_rej_time
+        bom_speedup = total_bon_time / total_bom_time
+        tracker.append(
+            (
+                mean_suboptimality_score,
+                mean_bom_suboptimality_score,
+                mean_speedup,
+                bom_speedup,
+            )
+        )
+        print(f"bom speedup: {bom_speedup:.3f}")
+        print(f"bom score: {(mean_bom_suboptimality_score):.1f}")
         print(f"mean speedup: {mean_speedup:.3f}")
-        # print(f"relative compute time: {(1/mean_speedup):.3f}")
-        print(f"mean score: {(mean_suboptimality_score):.1f}")
-        # print(f"median score: {(median_suboptimality_score):.1f}")
-        # print(f"effective N: {int(round(num_trajectories/mean_speedup))}")
+        print(f"mean score: {(mean_suboptimality_score - score_offset):.1f}")
         print("****************************************************")
+    print(f"AVG BOM SCORE: {np.mean([t[1] for t in tracker]):.1f}")
+    print(f"AVG BOM SPEEDUP: {np.mean([t[3] for t in tracker]):.3f}")
+    print(f"AVERAGE SCORE: {(np.mean([t[0] for t in tracker]) - score_offset):.1f}")
+    print(f"AVERAGE SPEEDUP: {np.mean([t[2] for t in tracker]):.3f}")
 
 
 if __name__ == "__main__":
