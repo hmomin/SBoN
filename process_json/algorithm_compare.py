@@ -12,6 +12,7 @@ from tqdm import tqdm
 from typing import Any
 
 GENERATION_FOLDER_PATHS = [
+    # AF
     # "./output_AF_gpt2-xl__20_1000_seed_0",
     # "./output_AF_gpt2-xl__20_1000_seed_0",
     # "./output_AF_gpt2-xl__20_1000_seed_0",
@@ -26,11 +27,16 @@ GENERATION_FOLDER_PATHS = [
     # "./output_AF_Meta-Llama-3-8B__20_1000_seed_0",
     # "./output_AF_Meta-Llama-3-8B__20_1000_seed_0",
     # "./output_AF_Meta-Llama-3-8B__20_1000_seed_0",
-    "./output_HH_Meta-Llama-3-8B__20_1000_seed_0",
-    "./output_HH_Meta-Llama-3-8B__20_1000_seed_0",
-    "./output_HH_Meta-Llama-3-8B__20_1000_seed_0",
+    # HH
+    # "./output_HH_Meta-Llama-3-8B__20_1000_seed_0",
+    # "./output_HH_Meta-Llama-3-8B__20_1000_seed_0",
+    # "./output_HH_Meta-Llama-3-8B__20_1000_seed_0",
+    # PERPLEXITY
+    "./output_AF_Mistral-7B-v0.3__20_1000_seed_0",
+    "./output_AF_Meta-Llama-3-8B__20_1000_seed_0",
 ]
 SCORE_FOLDER_PATHS = [
+    # AF
     # "./output_AF_gpt2-xl__20_1000_seed_0_reward-model-deberta-v3-large-v2",
     # "./output_AF_gpt2-xl__20_1000_seed_0_RM-Mistral-7B",
     # "./output_AF_gpt2-xl__20_1000_seed_0_FsfairX-LLaMA3-RM-v0.1",
@@ -45,11 +51,16 @@ SCORE_FOLDER_PATHS = [
     # "./output_AF_Meta-Llama-3-8B__20_1000_seed_0_RM-Mistral-7B",
     # "./output_AF_Meta-Llama-3-8B__20_1000_seed_0_FsfairX-LLaMA3-RM-v0.1",
     # "./output_AF_Meta-Llama-3-8B__20_1000_seed_0_ArmoRM-Llama3-8B-v0.1",
-    "./output_HH_Meta-Llama-3-8B__20_1000_seed_0_RM-Mistral-7B",
-    "./output_HH_Meta-Llama-3-8B__20_1000_seed_0_FsfairX-LLaMA3-RM-v0.1",
-    "./output_HH_Meta-Llama-3-8B__20_1000_seed_0_ArmoRM-Llama3-8B-v0.1",
+    # HH
+    # "./output_HH_Meta-Llama-3-8B__20_1000_seed_0_RM-Mistral-7B",
+    # "./output_HH_Meta-Llama-3-8B__20_1000_seed_0_FsfairX-LLaMA3-RM-v0.1",
+    # "./output_HH_Meta-Llama-3-8B__20_1000_seed_0_ArmoRM-Llama3-8B-v0.1",
+    # PERPLEXITY
+    "./output_AF_Mistral-7B-v0.3__20_1000_seed_0_perplexity",
+    "./output_AF_Meta-Llama-3-8B__20_1000_seed_0_perplexity",
 ]
 SBON_FOLDER_PATHS = [
+    # AF
     # "./output_A100_SR_AF_gpt2-xl_reward-model-deberta-v3-large-v2_256_0.8",
     # "./output_A100_SR_AF_gpt2-xl_RM-Mistral-7B_128_0.8",
     # "./output_A100_SR_AF_gpt2-xl_FsfairX-LLaMA3-RM-v0.1_128_0.7",
@@ -64,9 +75,13 @@ SBON_FOLDER_PATHS = [
     # "./output_H100_SR_AF_Meta-Llama-3-8B_RM-Mistral-7B_128_0.8",
     # "./output_H100_SR_AF_Meta-Llama-3-8B_FsfairX-LLaMA3-RM-v0.1_1024_0.6",
     # "./output_H100_SR_AF_Meta-Llama-3-8B_ArmoRM-Llama3-8B-v0.1_256_0.5",
-    "./output_H100_SR_HH_Meta-Llama-3-8B_RM-Mistral-7B_256_0.8",
-    "./output_H100_SR_HH_Meta-Llama-3-8B_FsfairX-LLaMA3-RM-v0.1_256_0.2",
-    "./output_H100_SR_HH_Meta-Llama-3-8B_ArmoRM-Llama3-8B-v0.1_256_0.6",
+    # HH
+    # "./output_H100_SR_HH_Meta-Llama-3-8B_RM-Mistral-7B_256_0.8",
+    # "./output_H100_SR_HH_Meta-Llama-3-8B_FsfairX-LLaMA3-RM-v0.1_256_0.2",
+    # "./output_H100_SR_HH_Meta-Llama-3-8B_ArmoRM-Llama3-8B-v0.1_256_0.6",
+    # PERPLEXITY
+    "./output_H100_SR_AF_Mistral-7B-v0.3_perplexity_256_0.8",
+    "./output_H100_SR_AF_Meta-Llama-3-8B_perplexity_128_0.7",
 ]
 
 
@@ -105,22 +120,28 @@ def nesting_check(data: list[dict[str, Any]]) -> None:
 
 
 def compute_suboptimality_score(
-    bon_data: list[dict[str, Any]], spec_rej_data: list[dict[str, Any]]
+    bon_data: list[dict[str, Any]],
+    spec_rej_data: list[dict[str, Any]],
+    get_raw_score: bool = False,
 ) -> float:
     bon_scores = [t["score"] for batch in bon_data for t in batch["trajectories"]]
     assert len(bon_scores) == 100
     spec_rej_scores = [
         t["score"] for batch in spec_rej_data for t in batch["trajectories"]
     ]
+    max_sbon_score = max(spec_rej_scores)
+    if get_raw_score:
+        return max_sbon_score
     absolute_difference = max(bon_scores) - min(bon_scores)
-    sbon_difference = max(spec_rej_scores) - min(bon_scores)
+    sbon_difference = max_sbon_score - min(bon_scores)
     suboptimality_score = sbon_difference / absolute_difference * 100
     return suboptimality_score
 
 
 def main() -> None:
     random.seed(0)
-    score_offset = 1.7
+    score_offset = 1.7  # FIXME
+    score_offset = 0.0
     M = 40
     tracker = []
 
@@ -143,6 +164,7 @@ def main() -> None:
             len(generation_filepaths) == len(score_filepaths) == len(spec_rej_filepaths)
         ), f"{len(generation_filepaths)} != {len(score_filepaths)} != {len(spec_rej_filepaths)}"
 
+        bon_scores: list[float] = []
         suboptimality_scores: list[float] = []
         bom_suboptimality_scores: list[float] = []
         total_bon_time = 0.0
@@ -152,6 +174,7 @@ def main() -> None:
         for generation_filepath, score_filepath, spec_rej_filepath in zip(
             generation_filepaths, score_filepaths, spec_rej_filepaths
         ):
+            perplexity = "perplexity" in score_filepath
             generation_filepath_ending = generation_filepath.split("_")[-1]
             score_filepath_ending = score_filepath.split("_")[-1]
             spec_rej_filepath_ending = spec_rej_filepath.split("_")[-1]
@@ -160,51 +183,73 @@ def main() -> None:
                 == score_filepath_ending
                 == spec_rej_filepath_ending
             ), f"{generation_filepath_ending} != {score_filepath_ending} != {spec_rej_filepath_ending}"
+
             generation_data = get_data_from_filepath(generation_filepath)
             score_data = get_data_from_filepath(score_filepath)
             spec_rej_data = get_data_from_filepath(spec_rej_filepath)
+
             bo1000_data = get_full_bon_data(generation_data, score_data)
             bon_data = random.choices(bo1000_data, k=5)
             bom_data = random.choices(bo1000_data, k=num_effective_batches)
+
+            max_bon_score = max(
+                [t["score"] for batch in bon_data for t in batch["trajectories"]]
+            )
+            if perplexity:
+                max_bon_score *= -1
+            bon_scores.append(max_bon_score)
+
             bon_time = sum([d["elapsed_sec"] for d in bon_data])
             bom_time = sum([d["elapsed_sec"] for d in bom_data])
             spec_rej_time = sum([d["elapsed_sec"] for d in spec_rej_data])
             total_bon_time += bon_time
             total_bom_time += bom_time
             total_spec_rej_time += spec_rej_time
-            suboptimality_score = compute_suboptimality_score(bon_data, spec_rej_data)
-            bom_suboptimality_score = compute_suboptimality_score(bon_data, bom_data)
+
+            suboptimality_score = compute_suboptimality_score(
+                bon_data, spec_rej_data, perplexity
+            )
+            bom_suboptimality_score = compute_suboptimality_score(
+                bon_data, bom_data, perplexity
+            )
             suboptimality_scores.append(suboptimality_score)
             bom_suboptimality_scores.append(bom_suboptimality_score)
             # print("****************************************************")
         # plot histogram of suboptimality scores
-        # plt.hist(suboptimality_scores, bins=100)
-        # plt.title("Suboptimality Scores")
-        # plt.xlabel("Suboptimality Score")
-        # plt.ylabel("Frequency")
-        # plt.show()
+        plt.hist(suboptimality_scores, bins=100)
+        plt.title("Suboptimality Scores")
+        plt.xlabel("Suboptimality Score")
+        plt.ylabel("Frequency")
+        plt.show()
+        mean_bon_score = np.mean(bon_scores)
         mean_suboptimality_score = np.mean(suboptimality_scores)
         mean_bom_suboptimality_score = np.mean(bom_suboptimality_scores)
+        if perplexity:
+            mean_suboptimality_score *= -1
+            mean_bom_suboptimality_score *= -1
         # median_suboptimality_score = np.median(suboptimality_scores)
         mean_speedup = total_bon_time / total_spec_rej_time
         bom_speedup = total_bon_time / total_bom_time
         tracker.append(
             (
+                mean_bon_score,
                 mean_suboptimality_score,
                 mean_bom_suboptimality_score,
                 mean_speedup,
                 bom_speedup,
             )
         )
+        print(f"bon score: {mean_bon_score:.3f}")
         print(f"bom speedup: {bom_speedup:.3f}")
-        print(f"bom score: {(mean_bom_suboptimality_score):.1f}")
+        print(f"bom score: {(mean_bom_suboptimality_score):.3f}")
         print(f"mean speedup: {mean_speedup:.3f}")
-        print(f"mean score: {(mean_suboptimality_score - score_offset):.1f}")
+        print(f"mean score: {(mean_suboptimality_score - score_offset):.3f}")
         print("****************************************************")
-    print(f"AVG BOM SCORE: {np.mean([t[1] for t in tracker]):.1f}")
-    print(f"AVG BOM SPEEDUP: {np.mean([t[3] for t in tracker]):.3f}")
-    print(f"AVERAGE SCORE: {(np.mean([t[0] for t in tracker]) - score_offset):.1f}")
-    print(f"AVERAGE SPEEDUP: {np.mean([t[2] for t in tracker]):.3f}")
+    print(f"AVG BON SCORE: {np.mean([t[0] for t in tracker]):.3f}")
+    print(f"AVG BOM SCORE: {np.mean([t[2] for t in tracker]):.3f}")
+    print(f"AVG BOM SPEEDUP: {np.mean([t[4] for t in tracker]):.3f}")
+    print(f"AVERAGE SCORE: {(np.mean([t[1] for t in tracker]) - score_offset):.3f}")
+    print(f"AVERAGE SPEEDUP: {np.mean([t[3] for t in tracker]):.3f}")
 
 
 if __name__ == "__main__":

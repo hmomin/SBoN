@@ -101,6 +101,18 @@ Decision Token: 128
 Token Rate:     0.402
 Score:          99.1
 ********************************************************************************
+HH + gpt-j-6b + ArmoRM-Llama3-8B-v0.1
+Rejection Rate: 0.8
+Decision Token: 128
+Token Rate:     0.302
+Score:          99.4
+********************************************************************************
+HH + gpt-j-6b + FsfairX-LLaMA3-RM-v0.1
+Rejection Rate: 0.6
+Decision Token: 128
+Token Rate:     0.464
+Score:          99.2
+********************************************************************************
 HH + gpt-j-6b + reward-model-deberta-v3-large-v2
 Rejection Rate: 0.8
 Decision Token: 256
