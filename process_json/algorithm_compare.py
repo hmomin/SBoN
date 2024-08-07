@@ -119,7 +119,7 @@ def compute_suboptimality_score(
 
 
 def main() -> None:
-    random.seed(1)
+    random.seed(0)
     score_offset = 1.7
     M = 40
     tracker = []
